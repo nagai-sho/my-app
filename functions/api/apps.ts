@@ -1,12 +1,9 @@
 import type { PagesFunction } from '@cloudflare/workers-types';
 
+import { hasValidAdminSession } from '../lib/adminSession';
+import type { AppEnv } from '../lib/env';
+import { jsonResponse } from '../lib/http';
 import { verifyGoogleIdToken } from '../lib/google';
-
-interface AppEnv extends Env {
-  GOOGLE_CLIENT_ID?: string;
-  ALLOWED_GOOGLE_EMAILS?: string;
-  BYPASS_AUTH?: string;
-}
 
 interface AppRow {
   id: string;
@@ -19,24 +16,6 @@ interface AppRow {
   tags: string | null;
   created_at: number;
   updated_at: number;
-}
-
-const JSON_HEADERS = {
-  'Cache-Control': 'no-store',
-  'Content-Type': 'application/json; charset=utf-8',
-};
-
-type PagesResponse = Awaited<ReturnType<PagesFunction<AppEnv>>>;
-
-function jsonResponse(
-  body: unknown,
-  status = 200,
-  extraHeaders: Record<string, string> = {},
-): PagesResponse {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...JSON_HEADERS, ...extraHeaders },
-  }) as unknown as PagesResponse;
 }
 
 function isBypassAuthEnabled(env: AppEnv): boolean {
@@ -53,11 +32,19 @@ function getAllowedEmails(value: string | undefined): Set<string> {
 }
 
 async function isAuthorized(
-  request: { headers: Pick<Headers, 'get'> },
+  request: { url: string; headers: Pick<Headers, 'get'> },
   env: AppEnv,
 ): Promise<boolean> {
   if (isBypassAuthEnabled(env)) {
     return true;
+  }
+
+  try {
+    if (await hasValidAdminSession(request, env)) {
+      return true;
+    }
+  } catch {
+    return false;
   }
 
   const authorization = request.headers.get('Authorization');
@@ -129,11 +116,11 @@ function toApp(row: AppRow) {
 
 export const onRequest: PagesFunction<AppEnv> = async ({ request, env }) => {
   if (request.method !== 'GET') {
-    return jsonResponse({ error: 'Method Not Allowed' }, 405, { Allow: 'GET' });
+    return jsonResponse<AppEnv>({ error: 'Method Not Allowed' }, 405, { Allow: 'GET' });
   }
 
   if (!(await isAuthorized(request, env))) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
+    return jsonResponse<AppEnv>({ error: 'Unauthorized' }, 401);
   }
 
   try {
@@ -143,8 +130,8 @@ export const onRequest: PagesFunction<AppEnv> = async ({ request, env }) => {
        ORDER BY pinned DESC, sort_order ASC, name COLLATE NOCASE ASC`,
     ).all<AppRow>();
 
-    return jsonResponse({ apps: result.results.map(toApp) });
+    return jsonResponse<AppEnv>({ apps: result.results.map(toApp) });
   } catch {
-    return jsonResponse({ error: '予期せぬエラーが発生しました。' }, 500);
+    return jsonResponse<AppEnv>({ error: '予期せぬエラーが発生しました。' }, 500);
   }
 };

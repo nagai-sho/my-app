@@ -11,3 +11,7 @@
 ## Googleトークン検証
 
 認証処理はフロントでGoogle Identity Servicesに委譲し、FunctionsではGoogle公開JWKを使ってRS256署名を検証する。署名だけでなくissuer、audience、exp、email_verified、許可メールアドレスを検証し、検証失敗時は一覧を返さない。
+
+## 管理者ログイン
+
+ユーザー要望により、Google認証に加えて `USER_NAME` / `PASSWORD` による管理者ログインを追加した。資格情報はブラウザへ埋め込まず、`POST /api/auth/login` でFunctions側だけが照合する。成功時はランダムなセッションIDのSHA-256ハッシュをD1へ保存し、HttpOnly・SameSite Cookieを発行する。`/api/apps` はこのセッションまたはGoogle IDトークンのいずれかが有効な場合に一覧を返す。

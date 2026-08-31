@@ -56,17 +56,35 @@ function Dashboard({ idToken, onLogout }: { idToken: string | null; onLogout: ()
 
 export default function App(): JSX.Element {
   const auth = useAuth();
+  const {
+    loginWithAdminCredentials,
+    loginWithGoogleToken,
+  } = auth;
   const handleGoogleLogin = useCallback(
-    (token: string) => auth.loginWithGoogleToken(token),
-    [auth],
+    (token: string) => loginWithGoogleToken(token),
+    [loginWithGoogleToken],
   );
+  const handleAdminLogin = useCallback(
+    (username: string, password: string) => loginWithAdminCredentials(username, password),
+    [loginWithAdminCredentials],
+  );
+
+  if (auth.isCheckingSession) {
+    return (
+      <main className={styles.authLoading} aria-live="polite">
+        認証状態を確認しています…
+      </main>
+    );
+  }
 
   if (!auth.isAuthenticated) {
     return (
       <LoginPage
         enableDevLogin={appConfig.enableDevLogin}
+        onAdminLogin={handleAdminLogin}
         onDevLogin={auth.loginWithDevCredentials}
         onGoogleLogin={handleGoogleLogin}
+        showAdminLogin={appConfig.apiMode === 'real'}
       />
     );
   }

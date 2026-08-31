@@ -52,3 +52,12 @@
   margin-top: 2rem;
   text-align: center;
 }
+
+.authLoading {
+  align-items: center;
+  background: #f6f7fb;
+  color: #66718a;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}

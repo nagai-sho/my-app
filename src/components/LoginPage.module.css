@@ -99,6 +99,11 @@
   background: #304e86;
 }
 
+.submitButton:disabled {
+  background: #9aa8c5;
+  cursor: wait;
+}
+
 .submitButton:focus-visible {
   outline: 3px solid #9bb8ff;
   outline-offset: 2px;
@@ -121,4 +126,32 @@
 
 .googleLogin {
   min-height: 76px;
+}
+
+.adminLogin {
+  margin-top: 1.5rem;
+}
+
+.divider {
+  align-items: center;
+  color: #a0a8b9;
+  display: flex;
+  font-size: 0.75rem;
+  gap: 0.7rem;
+  margin-bottom: 1.2rem;
+}
+
+.divider::before,
+.divider::after {
+  background: #e3e7ef;
+  content: '';
+  flex: 1;
+  height: 1px;
+}
+
+.adminTitle {
+  color: #44506b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0;
 }

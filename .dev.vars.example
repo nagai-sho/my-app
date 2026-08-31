@@ -1,5 +1,7 @@
 # wrangler pages dev 用。ローカルD1を認証なしで確認する場合に使います。
 BYPASS_AUTH=true
 RUNTIME_ENV=preview
+USER_NAME=admin@example.com
+PASSWORD=password
 GOOGLE_CLIENT_ID=
 ALLOWED_GOOGLE_EMAILS=

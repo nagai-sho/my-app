@@ -6,8 +6,10 @@ import styles from './LoginPage.module.css';
 
 interface LoginPageProps {
   enableDevLogin: boolean;
+  onAdminLogin: (username: string, password: string) => Promise<boolean>;
   onDevLogin: (user: string, password: string) => boolean;
   onGoogleLogin: (token: string) => void;
+  showAdminLogin: boolean;
 }
 
 function DevLoginForm({ onDevLogin }: Pick<LoginPageProps, 'onDevLogin'>): JSX.Element {
@@ -54,6 +56,64 @@ function DevLoginForm({ onDevLogin }: Pick<LoginPageProps, 'onDevLogin'>): JSX.E
         ログイン
       </button>
       <p className={styles.hint}>ローカル確認用: admin@example.com / password</p>
+    </form>
+  );
+}
+
+function AdminLoginForm({
+  onAdminLogin,
+}: Pick<LoginPageProps, 'onAdminLogin'>): JSX.Element {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    const authenticated = await onAdminLogin(username, password);
+    if (!authenticated) {
+      setError('管理者のユーザー名またはパスワードが正しくありません。');
+    }
+    setIsSubmitting(false);
+  }
+
+  return (
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <label className={styles.label} htmlFor="admin-user">
+        管理者ユーザー名
+      </label>
+      <input
+        id="admin-user"
+        className={styles.input}
+        type="text"
+        autoComplete="username"
+        value={username}
+        onChange={(event) => setUsername(event.target.value)}
+        required
+      />
+      <label className={styles.label} htmlFor="admin-password">
+        管理者パスワード
+      </label>
+      <input
+        id="admin-password"
+        className={styles.input}
+        type="password"
+        autoComplete="current-password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        required
+      />
+      {error && <p className={styles.error} role="alert">{error}</p>}
+      <button
+        type="submit"
+        className={styles.submitButton}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? '確認中…' : '管理者としてログイン'}
+      </button>
     </form>
   );
 }
@@ -110,8 +170,10 @@ function GoogleLogin({ onGoogleLogin }: Pick<LoginPageProps, 'onGoogleLogin'>): 
 
 export function LoginPage({
   enableDevLogin,
+  onAdminLogin,
   onDevLogin,
   onGoogleLogin,
+  showAdminLogin,
 }: LoginPageProps): JSX.Element {
   return (
     <main className={styles.page}>
@@ -124,6 +186,15 @@ export function LoginPage({
           <DevLoginForm onDevLogin={onDevLogin} />
         ) : (
           <GoogleLogin onGoogleLogin={onGoogleLogin} />
+        )}
+        {showAdminLogin && (
+          <div className={styles.adminLogin}>
+            <div className={styles.divider}>
+              <span>または</span>
+            </div>
+            <p className={styles.adminTitle}>管理者ログイン</p>
+            <AdminLoginForm onAdminLogin={onAdminLogin} />
+          </div>
         )}
       </section>
     </main>

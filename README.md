@@ -46,9 +46,10 @@ Cloudflare PagesのProduction / Preview環境変数として次を設定しま�
 
 - `GOOGLE_CLIENT_ID`: IDトークンのaudience検証用
 - `ALLOWED_GOOGLE_EMAILS`: 許可するGoogleメールアドレスのカンマ区切り
+- `USER_NAME`: 管理者ログインのユーザー名
+- `PASSWORD`: 管理者ログインのパスワード（Secretとして設定）
 - `BYPASS_AUTH`: ローカル確認時だけ `true`。本番は `false` または未設定
 - `RUNTIME_ENV`: `production` または `preview`
-- `USER_NAME` / `PASSWORD`: 互換用の予約値。本番ログインには使用しません
 
 ローカルのPages Functionsを認証なしで確認するときは、`.dev.vars.example` を `.dev.vars` にコピーし、ビルド後に実行します。
 
@@ -75,11 +76,13 @@ npm run d1:migrate
 `GET /api/apps` が `{ "apps": [...] }` を返します。
 
 - 本番: `Authorization: Bearer <Google ID token>` が必須
+- 管理者ログイン: `POST /api/auth/login` で `USER_NAME` / `PASSWORD` を照合し、HttpOnlyセッションCookieを発行
+- 管理者セッション: `GET /api/auth/session` で再読込時のログイン状態を確認、`POST /api/auth/logout` で破棄
 - `BYPASS_AUTH=true`: ローカル確認用に認証を省略
 - D1から `pinned DESC, sort_order ASC, name ASC` で取得
 - `url` と `icon_url` は `https` のみを許可
 
-FunctionsはIDトークンの署名、`exp`、`aud`、issuer、メール検証済みフラグ、許可メールアドレスを確認します。Google認証そのものはGoogle Identity Servicesが担当します。
+FunctionsはGoogle IDトークンの署名、`exp`、`aud`、issuer、メール検証済みフラグ、許可メールアドレスを確認します。Google認証そのものはGoogle Identity Servicesが担当します。管理者セッションのトークンはハッシュ化してD1へ保存します。
 
 ## ディレクトリ
 

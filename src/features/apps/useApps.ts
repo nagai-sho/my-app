@@ -56,7 +56,10 @@ async function fetchApps(apiMode: ApiMode, idToken: string | null): Promise<App[
     headers.set('Authorization', `Bearer ${idToken}`);
   }
 
-  const response = await fetch('/api/apps', { headers });
+  const response = await fetch('/api/apps', {
+    credentials: 'same-origin',
+    headers,
+  });
   let body: unknown = null;
   try {
     body = await response.json();
