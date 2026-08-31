@@ -1,9 +1,8 @@
 import type { PagesFunction } from '@cloudflare/workers-types';
 
-import { hasValidAdminSession } from '../lib/adminSession';
+import { isAuthorized } from '../lib/authorization';
 import type { AppEnv } from '../lib/env';
 import { jsonResponse } from '../lib/http';
-import { verifyGoogleIdToken } from '../lib/google';
 
 interface AppRow {
   id: string;
@@ -16,42 +15,6 @@ interface AppRow {
   tags: string | null;
   created_at: number;
   updated_at: number;
-}
-
-function getAllowedEmails(value: string | undefined): Set<string> {
-  return new Set(
-    (value ?? '')
-      .split(',')
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  );
-}
-
-async function isAuthorized(
-  request: { url: string; headers: Pick<Headers, 'get'> },
-  env: AppEnv,
-): Promise<boolean> {
-  try {
-    if (await hasValidAdminSession(request, env)) {
-      return true;
-    }
-  } catch {
-    return false;
-  }
-
-  const authorization = request.headers.get('Authorization');
-  if (!authorization?.startsWith('Bearer ')) {
-    return false;
-  }
-
-  const token = authorization.slice('Bearer '.length).trim();
-  if (!token) {
-    return false;
-  }
-
-  const claims = await verifyGoogleIdToken(token, env.GOOGLE_CLIENT_ID ?? '');
-  const email = claims?.email?.trim().toLowerCase();
-  return Boolean(email && getAllowedEmails(env.ALLOWED_GOOGLE_EMAILS).has(email));
 }
 
 function parseTags(value: string | null): string[] | undefined {
@@ -71,7 +34,11 @@ function parseTags(value: string | null): string[] | undefined {
   return undefined;
 }
 
-function parseHttpsUrl(value: string, fieldName: string): string {
+function parseAppUrl(value: string, fieldName: string): string {
+  if (value.startsWith('/') && !value.startsWith('//')) {
+    return value;
+  }
+
   const url = new URL(value);
   if (url.protocol !== 'https:' || !url.hostname) {
     throw new Error(`${fieldName} must use https`);
@@ -91,11 +58,11 @@ function toApp(row: AppRow) {
     throw new Error('An app row contains an invalid number');
   }
 
-  const iconUrl = row.icon_url ? parseHttpsUrl(row.icon_url, 'icon_url') : undefined;
+  const iconUrl = row.icon_url ? parseAppUrl(row.icon_url, 'icon_url') : undefined;
   return {
     id: row.id,
     name: row.name,
-    url: parseHttpsUrl(row.url, 'url'),
+    url: parseAppUrl(row.url, 'url'),
     ...(row.description ? { description: row.description } : {}),
     sortOrder,
     ...(iconUrl ? { iconUrl } : {}),

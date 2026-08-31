@@ -17,6 +17,16 @@ npx wrangler pages dev dist
 
 `.dev.vars` の `USER_NAME` / `PASSWORD` がローカル管理者ログインの認証情報です。`.dev.vars` はコミットしないでください。
 
+## 統合アプリ
+
+このリポジトリを4アプリ共通のサイトとして使用します。現在は次のword-app機能を統合しています。
+
+- `/word`: 単語カードの学習
+- `/word/cards`: カード・ディレクトリの編集、CSV入出力
+
+word-appの画面とAPIはmy-appのビルド・Pages Functions・共通認証を利用します。
+移設内容の詳細は [word-app統合メモ](doc/word-app-integration.md) を参照してください。
+
 ## 確認コマンド
 
 ```bash
@@ -56,7 +66,7 @@ npm run d1:migrate:local
 npm run d1:migrate
 ```
 
-`migrations/0001_init.sql` が基本テーブルを作成し、`0002_seed.sql` が5件の初期データを投入し、`0003_admin_sessions.sql` が管理者セッション用テーブルを作成します。
+`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が管理者セッション、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目を作成します。
 
 ## API
 
@@ -66,7 +76,7 @@ npm run d1:migrate
 - 管理者ログイン: `POST /api/auth/login` で `USER_NAME` / `PASSWORD` を照合し、HttpOnlyセッションCookieを発行
 - 管理者セッション: `GET /api/auth/session` で再読込時のログイン状態を確認、`POST /api/auth/logout` で破棄
 - D1から `pinned DESC, sort_order ASC, name ASC` で取得
-- `url` と `icon_url` は `https` のみを許可
+- 外部の `url` と `icon_url` は `https`、統合アプリは `/` から始まる同一サイトのパスを許可
 
 FunctionsはGoogle IDトークンの署名、`exp`、`aud`、issuer、メール検証済みフラグ、許可メールアドレスを確認します。管理者セッションのトークンはハッシュ化してD1へ保存します。
 
@@ -74,8 +84,10 @@ FunctionsはGoogle IDトークンの署名、`exp`、`aud`、issuer、メール�
 
 - `src/components/`: カード、グリッド、ログイン、状態表示などの共通UI
 - `src/features/apps/`: アプリ一覧取得、並び順、モノグラム
+- `src/features/word/`: word-appの学習・編集画面、カード操作、CSV、フォルダ機能
 - `src/features/auth/`: 認証状態の管理
 - `src/lib/auth/`: Google Identity Services連携
-- `functions/api/`: Pages Functions API
+- `functions/api/`: Pages Functions API。`api/v1/word/` にword-app APIを含む
+- `public/`: 統合サイトのPWA manifest、Service Worker、アイコン
 - `migrations/`: D1 migration
 - `doc/`: 設計判断と責務の補足

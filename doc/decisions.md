@@ -19,3 +19,7 @@
 ## 認証とAPIモードの一本化
 
 ユーザー要望により、開発用ログイン、認証バイパス、モック/実API切替、実行環境識別を廃止した。対象は `VITE_ENABLE_DEV_LOGIN`、`BYPASS_AUTH`、`VITE_API_MODE`、`RUNTIME_ENV` である。フロントエンドは常にPages FunctionsのAPIを呼び出し、認証はGoogleログインまたは `USER_NAME` / `PASSWORD` による管理者ログインに統一する。ローカル確認も `wrangler pages dev` とローカルD1を使う。
+
+## word-appの統合
+
+my-appを複数アプリ共通の単一サイトとし、word-appを `/word` と `/word/cards` に統合した。word-appの独立Worker、独自OAuth画面、`APP_DB` バインディングは採用せず、画面は `src/features/word/`、APIは `functions/api/v1/word/`、D1は共通の `DB` バインディングを使用する。word-appのカード・フォルダ用テーブルはmy-appのmigration番号 `0004`〜`0008` に移設し、`0009` でランチャー項目を登録する。word APIの認証はmy-appの管理者セッションまたはGoogle IDトークンに統一する。

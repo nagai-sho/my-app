@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 import { AppGrid } from './components/AppGrid';
 import { AppHeader } from './components/AppHeader';
@@ -7,6 +8,7 @@ import { SkeletonGrid } from './components/SkeletonGrid';
 import { StatusState } from './components/StatusState';
 import { useAuth } from './features/auth/useAuth';
 import { useApps } from './features/apps/useApps';
+import { WordApp } from './features/word/WordApp';
 import styles from './App.module.css';
 
 function Dashboard({ idToken, onLogout }: { idToken: string | null; onLogout: () => void }): JSX.Element {
@@ -85,5 +87,17 @@ export default function App(): JSX.Element {
     );
   }
 
-  return <Dashboard idToken={auth.idToken} onLogout={auth.logout} />;
+  return (
+    <Routes>
+      <Route
+        path="/word/*"
+        element={<WordApp idToken={auth.idToken} onLogout={auth.logout} />}
+      />
+      <Route
+        path="/cards"
+        element={<WordApp idToken={auth.idToken} onLogout={auth.logout} />}
+      />
+      <Route path="*" element={<Dashboard idToken={auth.idToken} onLogout={auth.logout} />} />
+    </Routes>
+  );
 }
