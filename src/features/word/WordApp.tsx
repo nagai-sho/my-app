@@ -86,6 +86,9 @@ export function WordApp({ idToken, onLogout }: WordAppProps): JSX.Element {
             )}
           </div>
           <nav>
+            {showHeaderNavigation && (
+              <NavLink end to="/" aria-label="ホームに戻る">ホーム</NavLink>
+            )}
             {showHeaderNavigation && !showStudyFolder && <NavLink to="/word">学習</NavLink>}
             {showHeaderNavigation && !showCardsFolder && <NavLink to="/word/cards">編集</NavLink>}
             <button type="button" className="secondary logout-button" aria-label="ログアウト" onClick={onLogout}>

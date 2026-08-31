@@ -48,10 +48,13 @@ function CashbookLayout({ onLogout }: { onLogout: () => void }): JSX.Element {
     <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-zinc-950 dark:text-zinc-50">
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <NavLink to="/" className="text-lg font-semibold tracking-normal">
+          <NavLink to="/cashbook" className="text-lg font-semibold tracking-normal">
             Cashbook
           </NavLink>
           <nav className="flex flex-wrap items-center justify-end gap-2 text-sm">
+            <NavLink end className={({ isActive }) => navClass(isActive)} to="/" aria-label="ホームに戻る">
+              ホーム
+            </NavLink>
             <NavLink end className={({ isActive }) => navClass(isActive)} to="/cashbook">
               Dashboard
             </NavLink>
