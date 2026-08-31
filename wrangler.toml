@@ -8,3 +8,8 @@ database_name = "my-app"
 migrations_dir = "./migrations"
 # Cloudflareで作成したD1 database IDに置き換えてください。
 database_id = "ce71b5d2-ac90-47f1-9a88-223c6ac924f2"
+
+[[r2_buckets]]
+binding = "COLLECTION_R2"
+# collection-appで既存データを保存しているバケットをそのまま参照する。
+bucket_name = "collection-app-image"

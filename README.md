@@ -25,9 +25,11 @@ npx wrangler pages dev dist
 - `/cashbook/settings`: Cashbookの残高・カテゴリ・店舗設定
 - `/word`: 単語カードの学習
 - `/word/cards`: カード・ディレクトリの編集、CSV入出力
+- `/collection`: 画像・PDFの書籍整理、アップロード、並び替え、閲覧
 
-cashbook-appとword-appの画面・API・D1データはmy-appのビルド・Pages Functions・共通認証を利用します。
+cashbook-app、word-app、collection-appの画面・API・D1データはmy-appのビルド・Pages Functions・共通認証を利用します。
 移設内容の詳細は [cashbook-app統合メモ](doc/cashbook-app-integration.md) と [word-app統合メモ](doc/word-app-integration.md) を参照してください。
+collection-appの移設内容は [collection-app統合メモ](doc/collection-app-integration.md) を参照してください。
 
 ## 確認コマンド
 
@@ -78,7 +80,9 @@ npm run d1:migrate:local
 npm run d1:migrate
 ```
 
-`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が管理者セッション、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目を作成します。
+`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が管理者セッション、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目を作成します。
+
+collection-appの画像・PDFは、既存のR2バケット `collection-app-image` を `COLLECTION_R2` bindingとして参照します。既存データのR2キーは移行時に変更せず、APIが旧キーをフォールバック参照します。
 
 ## API
 
@@ -100,9 +104,10 @@ FunctionsはGoogle IDトークンの署名、`exp`、`aud`、issuer、メール�
 - `src/features/apps/`: アプリ一覧取得、並び順、モノグラム
 - `src/features/cashbook/`: Cashbookのダッシュボード、取引、集計、設定、Gmail連携
 - `src/features/word/`: word-appの学習・編集画面、カード操作、CSV、フォルダ機能
+- `src/features/collection/`: collection-appの書籍、ギャラリー、ファイルビューア、R2/D1連携
 - `src/features/auth/`: 認証状態の管理
 - `src/lib/auth/`: Google Identity Services連携
-- `functions/api/`: Pages Functions API。`api/v1/cashbook/` と `api/v1/word/` に統合アプリAPIを含む
+- `functions/api/`: Pages Functions API。`api/v1/cashbook/`、`api/v1/collection/`、`api/v1/word/` に統合アプリAPIを含む
 - `public/`: 統合サイトのPWA manifest、Service Worker、アイコン
 - `migrations/`: D1 migration
 - `doc/`: 設計判断と責務の補足

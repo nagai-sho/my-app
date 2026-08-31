@@ -29,3 +29,9 @@ my-appを複数アプリ共通の単一サイトとし、word-appを `/word` と
 cashbook-appも同じ単一サイトへ移設し、画面を `src/features/cashbook/`、APIを `functions/api/v1/cashbook/` と `functions/lib/cashbook*`、D1を共通の `DB` bindingへ統合した。Cashbook固有のテーブル名には `cashbook_` prefixを付け、word-appのテーブルや既存の `app_oauth_states` と衝突させない。Gmail OAuthの一時stateは `cashbook_oauth_states` に分離する。
 
 word-appの独自OAuth用Secretは使用しないが、CashbookのGmail OAuthでは `GOOGLE_CLIENT_SECRET` を使用する。どのアプリから呼び出しても認証入口はmy-appの管理者セッションまたはGoogle IDトークンに統一する。
+
+## collection-appの統合
+
+collection-appも同じ単一サイトへ移設し、画面を `src/features/collection/`、APIを `functions/api/v1/collection/` と `functions/lib/collection*`、メタデータを共通の `DB` bindingへ統合した。collection固有のOAuth・セッションは採用せず、my-appの管理者セッションまたはGoogle IDトークンに統一する。
+
+collectionの既存D1データは `collection_documents` と `collection_folders` へ移し、既存のR2キーを保持した。`COLLECTION_R2` bindingは既存バケット `collection-app-image` を参照し、ファイルAPIはcanonicalキーを優先して旧キーへフォールバックする。フォルダ移動はR2オブジェクトを移動せず、D1の `folder_path` だけを更新する。

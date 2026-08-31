@@ -1,0 +1,730 @@
+.collection-app {
+  color: #251f1a;
+  background: #edf2ee;
+  font-family:
+    Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", ui-serif,
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+.collection-app * {
+  box-sizing: border-box;
+}
+
+.collection-app {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(42, 89, 83, 0.08) 0 1px, transparent 1px 100%),
+    linear-gradient(#eef5f0, #f4efe4 54%, #e1dccf);
+  background-size: 42px 100%, auto;
+}
+
+.collection-app button,
+.collection-app input,
+.collection-app select {
+  font: inherit;
+}
+
+.collection-app a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.collection-app .center-screen,
+.collection-app .login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.collection-app .login-screen {
+  background:
+    linear-gradient(rgba(37, 31, 26, 0.18), rgba(244, 239, 228, 0.84)),
+    url("https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1600&q=82");
+  background-size: cover;
+  background-position: center;
+}
+
+.collection-app .login-panel {
+  width: min(420px, 100%);
+  background: rgba(255, 252, 244, 0.94);
+  border: 1px solid #d7b98a;
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow:
+    0 24px 80px rgba(55, 35, 19, 0.24),
+    inset 0 0 0 4px rgba(125, 67, 35, 0.06);
+}
+
+.collection-app .login-panel h1,
+.collection-app .app-header h1 {
+  margin: 0;
+  font-size: clamp(28px, 6vw, 42px);
+  line-height: 1.05;
+}
+
+.collection-app .eyebrow {
+  margin: 0 0 8px;
+  color: #8a3f35;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.collection-app .google-button,
+.collection-app .primary-button,
+.collection-app .icon-button,
+.collection-app .round-button {
+  min-height: 44px;
+  border: 0;
+  cursor: pointer;
+}
+
+.collection-app .google-button,
+.collection-app .primary-button,
+.collection-app .secondary-button,
+.collection-app .danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  padding: 12px 18px;
+}
+
+.collection-app .primary-button:disabled,
+.collection-app .secondary-button:disabled,
+.collection-app .danger-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.collection-app .primary-button {
+  background: #2a5953;
+  color: #fff;
+}
+
+.collection-app .secondary-button {
+  border: 1px solid #c9a46f;
+  background: #fffaf0;
+  color: #2f261f;
+}
+
+.collection-app .danger-button {
+  background: #8a3f35;
+  color: #fff;
+}
+
+.collection-app .google-button {
+  width: 100%;
+  margin-top: 24px;
+  background: #2a5953;
+  color: #fff;
+}
+
+.collection-app .app {
+  min-height: 100vh;
+}
+
+.collection-app .app-header,
+.collection-app .viewer-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 76px;
+  padding: 14px clamp(16px, 4vw, 40px);
+  background:
+    linear-gradient(90deg, rgba(138, 63, 53, 0.22), transparent 34%, rgba(255, 250, 240, 0.08)),
+    #24463f;
+  color: #fffaf0;
+  border-bottom: 1px solid #17342f;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(16, 38, 34, 0.18);
+}
+
+.collection-app .app-header .eyebrow,
+.collection-app .viewer-header .eyebrow {
+  color: #e0c596;
+}
+
+.collection-app .app-header h1 {
+  font-size: 24px;
+}
+
+.collection-app .user-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.collection-app .user-area span {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collection-app .user-area img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.collection-app .icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  border-radius: 8px;
+  background: #efe0c7;
+  color: #2f261f;
+}
+
+.collection-app .icon-button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.collection-app .page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 18px clamp(14px, 3vw, 28px) 96px;
+}
+
+.collection-app .shelf-page {
+  padding-top: 14px;
+}
+
+.collection-app .page-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 4px 0 22px;
+}
+
+.collection-app .page-title h2,
+.collection-app .book-form h2 {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 1;
+}
+
+.collection-app .book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 24px 18px;
+  padding: 20px 16px 28px;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, transparent calc(100% - 20px), rgba(36, 70, 63, 0.56) calc(100% - 20px)),
+    linear-gradient(90deg, rgba(36, 70, 63, 0.16), rgba(255, 250, 240, 0.52), rgba(138, 63, 53, 0.14));
+  box-shadow: inset 0 -18px 0 rgba(36, 70, 63, 0.22);
+}
+
+.collection-app .book-link {
+  min-width: 0;
+}
+
+.collection-app .book-card {
+  display: grid;
+  gap: 12px;
+}
+
+.collection-app .book-cover {
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #ba9562;
+  border-radius: 8px 4px 4px 8px;
+  background:
+    linear-gradient(90deg, rgba(42, 89, 83, 0.28) 0 14px, transparent 14px),
+    linear-gradient(135deg, rgba(42, 89, 83, 0.18), rgba(138, 63, 53, 0.16)),
+    #fffaf0;
+  color: #715039;
+  box-shadow:
+    8px 12px 0 rgba(78, 49, 29, 0.18),
+    0 14px 26px rgba(49, 34, 24, 0.14);
+}
+
+.collection-app .book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collection-app .book-card-meta {
+  display: grid;
+  gap: 4px;
+  padding: 0 6px;
+}
+
+.collection-app .book-card-meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+}
+
+.collection-app .book-card-meta span {
+  color: #715f4f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.collection-app .form-page {
+  max-width: 720px;
+}
+
+.collection-app .book-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+  border-left: 6px solid #24463f;
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.7);
+  padding: 22px;
+}
+
+.collection-app .danger-zone {
+  border-left-color: #8a3f35;
+}
+
+.collection-app .directory-panel {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 18px;
+  border-left: 6px solid #24463f;
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.58);
+  padding: 12px;
+}
+
+.collection-app .directory-create,
+.collection-app .directory-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.collection-app .directory-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.collection-app .directory-item {
+  min-height: 40px;
+  white-space: nowrap;
+  border: 1px solid #c9a46f;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #2f261f;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0 12px;
+}
+
+.collection-app .directory-item.is-active {
+  border-color: #2a5953;
+  background: #e3efe7;
+  color: #1f4843;
+}
+
+.collection-app .toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 4px 0 18px;
+}
+
+.collection-app .folder-field {
+  display: grid;
+  gap: 6px;
+  min-width: min(360px, 100%);
+}
+
+.collection-app .folder-field span {
+  color: #715039;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.collection-app .folder-field input,
+.collection-app .folder-field select,
+.collection-app .move-field select {
+  min-height: 44px;
+  border: 1px solid #c9a46f;
+  border-radius: 8px;
+  background: #fffaf0;
+  padding: 0 12px;
+}
+
+.collection-app .move-field {
+  display: inline-grid;
+  gap: 4px;
+  min-width: 220px;
+}
+
+.collection-app .move-field span {
+  color: #715039;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.collection-app .upload-status,
+.collection-app .alert,
+.collection-app .empty-state,
+.collection-app .muted {
+  margin: 14px 0;
+}
+
+.collection-app .bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 0 0 18px;
+}
+
+.collection-app .bulk-bar span {
+  color: #5d493a;
+  font-weight: 700;
+}
+
+.collection-app .muted-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collection-app .upload-status {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #d7b98a;
+  border-radius: 8px;
+  background: #fffaf0;
+}
+
+.collection-app progress {
+  width: 100%;
+  accent-color: #2a5953;
+}
+
+.collection-app .alert {
+  color: #8a1c1c;
+  background: #fff1f1;
+  border: 1px solid #f2c8c8;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.collection-app .muted,
+.collection-app .empty-state p {
+  color: #715f4f;
+}
+
+.collection-app .empty-state {
+  border: 1px dashed #c9a46f;
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.76);
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.collection-app .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 18px;
+  padding: 16px 14px 22px;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, transparent calc(100% - 18px), rgba(36, 70, 63, 0.46) calc(100% - 18px)),
+    linear-gradient(90deg, rgba(36, 70, 63, 0.16), rgba(255, 250, 240, 0.52), rgba(138, 63, 53, 0.14));
+  box-shadow: inset 0 -16px 0 rgba(36, 70, 63, 0.22);
+}
+
+.collection-app .card-link {
+  min-width: 0;
+}
+
+.collection-app .file-card {
+  position: relative;
+  min-height: 258px;
+  overflow: hidden;
+  border: 1px solid #ba9562;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(42, 89, 83, 0.18) 0 10px, transparent 10px),
+    #fffaf0;
+  box-shadow:
+    8px 12px 0 rgba(78, 49, 29, 0.16),
+    0 14px 28px rgba(49, 34, 24, 0.12);
+}
+
+.collection-app .file-card.is-image-only {
+  min-height: 0;
+}
+
+.collection-app .file-card.is-image-only .thumb {
+  aspect-ratio: 3 / 4;
+}
+
+.collection-app .file-card.is-selected {
+  border-color: #2a5953;
+  box-shadow:
+    8px 12px 0 rgba(78, 49, 29, 0.16),
+    0 0 0 3px rgba(42, 89, 83, 0.24);
+}
+
+.collection-app .select-box {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 250, 240, 0.94);
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.collection-app .select-box input {
+  width: 18px;
+  height: 18px;
+}
+
+.collection-app .thumb {
+  aspect-ratio: 4 / 5;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(42, 89, 83, 0.18), rgba(138, 63, 53, 0.12)),
+    #eadbc0;
+  color: #715039;
+}
+
+.collection-app .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collection-app .order-controls {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.collection-app .order-controls .icon-button {
+  width: 36px;
+  min-height: 36px;
+  background: rgba(255, 250, 240, 0.94);
+  border: 1px solid #c9a46f;
+}
+
+.collection-app .file-meta {
+  display: grid;
+  gap: 6px;
+  padding: 12px 46px 14px 12px;
+}
+
+.collection-app .file-meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collection-app .file-meta span {
+  color: #715f4f;
+  font-size: 13px;
+}
+
+.collection-app .delete-button {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+}
+
+.collection-app .viewer {
+  min-height: calc(100vh - 76px);
+  background: #111318;
+  color: #f9fafb;
+}
+
+.collection-app .viewer-header strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collection-app .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.collection-app .canvas-stage {
+  height: calc(100vh - 156px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.collection-app .transform-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.collection-app .transform-content {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.collection-app .viewer-image {
+  max-width: min(100vw, 1200px);
+  max-height: calc(100vh - 180px);
+  object-fit: contain;
+  user-select: none;
+}
+
+.collection-app .pager {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  backdrop-filter: blur(14px);
+}
+
+.collection-app .round-button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  border-radius: 8px;
+  color: #fff;
+  background: #0f766e;
+}
+
+.collection-app .round-button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .collection-app .app-header,
+  .collection-app .viewer-header {
+    padding-inline: 14px;
+  }
+
+  .collection-app .user-area span {
+    display: none;
+  }
+
+  .collection-app .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .collection-app .page-title {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .collection-app .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
+    padding: 14px 10px 22px;
+  }
+
+  .collection-app .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .collection-app .directory-create,
+  .collection-app .directory-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .collection-app .bulk-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .collection-app .move-field {
+    min-width: 0;
+  }
+
+  .collection-app .folder-field {
+    min-width: 0;
+  }
+
+  .collection-app .file-card {
+    min-height: 220px;
+  }
+
+  .collection-app .viewer-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 52px;
+    padding-block: 4px;
+    font-size: 13px;
+  }
+
+  .collection-app .viewer-header .back-link {
+    min-height: 40px;
+  }
+
+  .collection-app .canvas-stage {
+    height: calc(100dvh - 52px);
+  }
+
+  .collection-app .viewer-image {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: calc(100dvh - 52px);
+  }
+
+  .collection-app .pager {
+    bottom: max(10px, env(safe-area-inset-bottom));
+    gap: 10px;
+    padding: 6px;
+  }
+
+  .collection-app .round-button {
+    width: 48px;
+    min-height: 44px;
+  }
+}

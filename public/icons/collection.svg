@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">書棚</title>
+  <defs>
+    <linearGradient id="bg" x1="64" y1="40" x2="448" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a5953" />
+      <stop offset="1" stop-color="#17342f" />
+    </linearGradient>
+    <linearGradient id="paper" x1="146" y1="98" x2="372" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffaf0" />
+      <stop offset="1" stop-color="#efe0c7" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#102622" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <path d="M80 127h352v258H80z" fill="#1d3d38" opacity=".72" />
+  <path d="M97 392h318v33H97z" fill="#8a3f35" />
+  <g filter="url(#shadow)">
+    <rect x="126" y="116" width="74" height="266" rx="13" fill="url(#paper)" />
+    <rect x="218" y="92" width="76" height="290" rx="13" fill="#d7b98a" />
+    <rect x="312" y="132" width="74" height="250" rx="13" fill="#fffaf0" />
+  </g>
+  <path d="M151 156h24v184h-24z" fill="#2a5953" opacity=".88" />
+  <path d="M243 132h26v204h-26z" fill="#8a3f35" opacity=".86" />
+  <path d="M337 172h24v166h-24z" fill="#c9a46f" opacity=".95" />
+  <path d="M113 385h286v21H113z" fill="#c9a46f" />
+</svg>

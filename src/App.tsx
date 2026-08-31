@@ -9,6 +9,7 @@ import { StatusState } from './components/StatusState';
 import { useAuth } from './features/auth/useAuth';
 import { useApps } from './features/apps/useApps';
 import { CashbookApp } from './features/cashbook/CashbookApp';
+import { CollectionApp } from './features/collection/CollectionApp';
 import { WordApp } from './features/word/WordApp';
 import styles from './App.module.css';
 
@@ -94,6 +95,12 @@ export default function App(): JSX.Element {
         path="/cashbook/*"
         element={<CashbookApp idToken={auth.idToken} onLogout={auth.logout} />}
       />
+      <Route
+        path="/collection/*"
+        element={<CollectionApp idToken={auth.idToken} onLogout={auth.logout} />}
+      />
+      <Route path="/books/edit" element={<Navigate to="/collection/books/edit" replace />} />
+      <Route path="/books/new" element={<Navigate to="/collection/books/edit" replace />} />
       <Route path="/settings" element={<Navigate to="/cashbook/settings" replace />} />
       <Route path="/transactions" element={<Navigate to="/cashbook" replace />} />
       <Route path="/categories" element={<Navigate to="/cashbook/settings" replace />} />

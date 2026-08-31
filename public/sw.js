@@ -5,6 +5,11 @@ const APP_SHELL = [
   '/',
   '/cashbook',
   '/cashbook/settings',
+  '/collection',
+  '/collection/books/edit',
+  '/collection/books/detail',
+  '/collection/gallery',
+  '/collection/viewer',
   '/word',
   '/word/cards',
   '/index.html',
@@ -12,6 +17,7 @@ const APP_SHELL = [
   '/icons/icon-192.svg',
   '/icons/icon-512.svg',
   '/icons/cashbook.svg',
+  '/icons/collection.svg',
 ];
 const DEV_PATH_PREFIXES = ['/@vite', '/src/', '/node_modules/', '/@react-refresh'];
 
