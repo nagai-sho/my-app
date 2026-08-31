@@ -1,0 +1,54 @@
+.appShell {
+  background:
+    radial-gradient(circle at 90% 0%, rgb(206 218 248 / 30%), transparent 28%),
+    #f6f7fb;
+  min-height: 100vh;
+}
+
+.dashboard {
+  margin: 0 auto;
+  max-width: 1440px;
+  padding: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 4vw, 3.75rem) 2rem;
+}
+
+.searchSpacer {
+  height: clamp(1rem, 3vw, 2rem);
+}
+
+.main {
+  min-height: 420px;
+}
+
+.sectionHeading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionKicker {
+  color: #8791a8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.25rem;
+}
+
+.sectionTitle {
+  color: #2a3550;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.count {
+  color: #8993a9;
+  font-size: 0.75rem;
+}
+
+.footer {
+  color: #a0a8b9;
+  font-size: 0.72rem;
+  margin-top: 2rem;
+  text-align: center;
+}

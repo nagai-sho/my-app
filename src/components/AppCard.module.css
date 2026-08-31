@@ -1,0 +1,88 @@
+.card {
+  background: #ffffff;
+  border: 1px solid #e1e6f0;
+  border-radius: 18px;
+  box-shadow: 0 5px 16px rgb(52 65 93 / 5%);
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  min-height: 164px;
+  min-width: 0;
+  padding: 1rem;
+  position: relative;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.card:hover {
+  border-color: #b8c6e5;
+  box-shadow: 0 12px 24px rgb(52 65 93 / 10%);
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 3px solid #86a8ff;
+  outline-offset: 3px;
+}
+
+.icon {
+  align-items: center;
+  border-radius: 14px;
+  color: #ffffff;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 1.35rem;
+  font-weight: 700;
+  height: 48px;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+  width: 48px;
+}
+
+.icon img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.name {
+  color: #26314c;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.description {
+  color: #78829a;
+  display: -webkit-box;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  margin-top: 0.35rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.pinned {
+  color: #e7ad3d;
+  font-size: 0.72rem;
+  position: absolute;
+  right: 0.9rem;
+  top: 0.9rem;
+}
+
+@media (max-width: 420px) {
+  .card {
+    min-height: 150px;
+    padding: 0.8rem;
+  }
+
+  .icon {
+    height: 42px;
+    width: 42px;
+  }
+}

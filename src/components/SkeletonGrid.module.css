@@ -1,0 +1,52 @@
+@keyframes shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+.card,
+.icon,
+.name,
+.description,
+.descriptionShort {
+  background: linear-gradient(100deg, #edf0f6 30%, #f8f9fc 50%, #edf0f6 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.card {
+  border: 1px solid #e7eaf1;
+  border-radius: 18px;
+  min-height: 164px;
+  padding: 1rem;
+}
+
+.icon {
+  border-radius: 14px;
+  display: block;
+  height: 48px;
+  margin-bottom: 0.85rem;
+  width: 48px;
+}
+
+.name,
+.description,
+.descriptionShort {
+  border-radius: 4px;
+  display: block;
+  height: 0.9rem;
+}
+
+.description {
+  margin-top: 0.7rem;
+  width: 92%;
+}
+
+.descriptionShort {
+  margin-top: 0.45rem;
+  width: 65%;
+}

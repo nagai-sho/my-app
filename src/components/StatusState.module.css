@@ -1,0 +1,51 @@
+.state {
+  align-items: center;
+  background: rgb(255 255 255 / 70%);
+  border: 1px dashed #d6dce9;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.symbol {
+  align-items: center;
+  background: #eef2fb;
+  border-radius: 50%;
+  color: #536fae;
+  display: flex;
+  font-size: 1.25rem;
+  font-weight: 700;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.message {
+  color: #58647c;
+  font-size: 0.95rem;
+  margin: 1rem 0;
+}
+
+.retryButton {
+  background: #3d5f9e;
+  border: 0;
+  border-radius: 10px;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+}
+
+.retryButton:hover {
+  background: #304e86;
+}
+
+.retryButton:focus-visible {
+  outline: 3px solid #9bb8ff;
+  outline-offset: 2px;
+}

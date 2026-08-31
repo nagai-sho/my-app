@@ -1,0 +1,124 @@
+.page {
+  align-items: center;
+  background:
+    radial-gradient(circle at 10% 15%, rgb(184 202 245 / 35%), transparent 30%),
+    #f6f7fb;
+  display: flex;
+  min-height: 100vh;
+  padding: 1.25rem;
+}
+
+.panel {
+  background: rgb(255 255 255 / 92%);
+  border: 1px solid #e0e5f0;
+  border-radius: 24px;
+  box-shadow: 0 22px 60px rgb(50 66 103 / 11%);
+  margin: 0 auto;
+  max-width: 420px;
+  padding: clamp(1.5rem, 6vw, 3rem);
+  width: 100%;
+}
+
+.brandMark {
+  align-items: center;
+  background: #3d5f9e;
+  border-radius: 14px;
+  color: #ffffff;
+  display: flex;
+  font-size: 1.5rem;
+  font-weight: 700;
+  height: 48px;
+  justify-content: center;
+  margin-bottom: 1.35rem;
+  width: 48px;
+}
+
+.eyebrow {
+  color: #6e7891;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.35rem;
+}
+
+.title {
+  color: #1f2942;
+  font-size: clamp(2rem, 10vw, 3rem);
+  letter-spacing: -0.06em;
+  line-height: 1;
+  margin: 0;
+}
+
+.subtitle {
+  color: #78829a;
+  margin: 0.85rem 0 2rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: #44506b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin: 0.9rem 0 0.4rem;
+}
+
+.input {
+  background: #ffffff;
+  border: 1px solid #d5dcea;
+  border-radius: 10px;
+  color: #28344e;
+  font: inherit;
+  min-height: 46px;
+  padding: 0.65rem 0.75rem;
+  width: 100%;
+}
+
+.input:focus {
+  border-color: #6689d0;
+  outline: 3px solid #d5e0ff;
+}
+
+.submitButton {
+  background: #3d5f9e;
+  border: 0;
+  border-radius: 10px;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  margin-top: 1.4rem;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+}
+
+.submitButton:hover {
+  background: #304e86;
+}
+
+.submitButton:focus-visible {
+  outline: 3px solid #9bb8ff;
+  outline-offset: 2px;
+}
+
+.hint,
+.loading {
+  color: #8a93a6;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin: 1rem 0 0;
+}
+
+.error {
+  color: #b44d4d;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0.8rem 0 0;
+}
+
+.googleLogin {
+  min-height: 76px;
+}

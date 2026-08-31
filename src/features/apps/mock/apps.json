@@ -1,0 +1,57 @@
+[
+  {
+    "id": "app_1",
+    "name": "Notes",
+    "url": "https://notes.example.com",
+    "description": "個人メモをすばやく確認・編集",
+    "sortOrder": 10,
+    "pinned": true,
+    "tags": ["tool"],
+    "createdAt": 1704067200000,
+    "updatedAt": 1704067200000
+  },
+  {
+    "id": "app_2",
+    "name": "Tasks",
+    "url": "https://tasks.example.com",
+    "description": "毎日のタスクと予定を管理",
+    "sortOrder": 20,
+    "pinned": true,
+    "tags": ["productivity"],
+    "createdAt": 1704067200000,
+    "updatedAt": 1704067200000
+  },
+  {
+    "id": "app_3",
+    "name": "Links",
+    "url": "https://links.example.com",
+    "description": "よく使うリンクをまとめて確認",
+    "sortOrder": 30,
+    "pinned": false,
+    "tags": ["utility"],
+    "createdAt": 1704067200000,
+    "updatedAt": 1704067200000
+  },
+  {
+    "id": "app_4",
+    "name": "Calendar",
+    "url": "https://calendar.example.com",
+    "description": "予定と締め切りを一覧で確認",
+    "sortOrder": 40,
+    "pinned": false,
+    "tags": ["productivity"],
+    "createdAt": 1704067200000,
+    "updatedAt": 1704067200000
+  },
+  {
+    "id": "app_5",
+    "name": "Dashboard",
+    "url": "https://dashboard.example.com",
+    "description": "運用中サービスの状態を確認",
+    "sortOrder": 50,
+    "pinned": false,
+    "tags": ["monitoring"],
+    "createdAt": 1704067200000,
+    "updatedAt": 1704067200000
+  }
+]
