@@ -1,6 +1,5 @@
-import { hasValidAdminSession } from './adminSession';
+import { getValidAppSession } from './adminSession';
 import type { AppEnv } from './env';
-import { verifyGoogleIdToken } from './google';
 
 function getAllowedEmails(value: string | undefined): Set<string> {
   return new Set(
@@ -27,43 +26,23 @@ export async function getAuthorizedUser(
   env: AppEnv,
 ): Promise<AuthorizedUser | null> {
   try {
-    if (await hasValidAdminSession(request, env)) {
-      return {
-        id: 'owner',
-        email: env.OWNER_GOOGLE_EMAIL?.trim() || firstAllowedEmail(env.ALLOWED_GOOGLE_EMAILS) || 'admin@example.com',
-        name: '管理者',
-      };
-    }
+    const session = await getValidAppSession(request, env);
+    if (!session) return null;
+    return session;
   } catch {
     return null;
   }
-
-  const authorization = request.headers.get('Authorization');
-  if (!authorization?.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authorization.slice('Bearer '.length).trim();
-  if (!token) {
-    return null;
-  }
-
-  const claims = await verifyGoogleIdToken(token, env.GOOGLE_CLIENT_ID ?? '');
-  const email = claims?.email?.trim().toLowerCase();
-  if (!email || !getAllowedEmails(env.ALLOWED_GOOGLE_EMAILS).has(email)) {
-    return null;
-  }
-
-  return {
-    id: 'owner',
-    email,
-  };
 }
 
 export async function isAuthorized(request: AuthorizationRequest, env: AppEnv): Promise<boolean> {
   return Boolean(await getAuthorizedUser(request, env));
 }
 
-function firstAllowedEmail(value: string | undefined): string | null {
-  return [...getAllowedEmails(value)][0] || null;
+export function isAllowedGoogleEmail(value: string | undefined, env: AppEnv): boolean {
+  const email = value?.trim().toLowerCase();
+  if (!email) return false;
+  const allowed = getAllowedEmails(env.ALLOWED_GOOGLE_EMAILS);
+  if (allowed.size > 0) return allowed.has(email);
+  const ownerEmail = env.OWNER_GOOGLE_EMAIL?.trim().toLowerCase();
+  return !ownerEmail || ownerEmail === email;
 }

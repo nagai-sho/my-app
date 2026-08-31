@@ -26,7 +26,7 @@ function jsonResponse(body: unknown, status = 200): ReturnType<typeof pagesJsonR
 }
 
 function dbMissing(): WordResponse {
-  return jsonResponse({ error: 'D1 binding DB is not configured' }, 503);
+  return jsonResponse({ error: 'Shared D1 binding DB is not configured' }, 503);
 }
 
 function invalidPayload(message: string): WordResponse {

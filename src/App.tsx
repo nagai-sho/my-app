@@ -10,6 +10,7 @@ import { useAuth } from './features/auth/useAuth';
 import { useApps } from './features/apps/useApps';
 import { CashbookApp } from './features/cashbook/CashbookApp';
 import { CollectionApp } from './features/collection/CollectionApp';
+import { GathererApp } from './features/gatherer/GathererApp';
 import { WordApp } from './features/word/WordApp';
 import styles from './App.module.css';
 
@@ -99,6 +100,7 @@ export default function App(): JSX.Element {
         path="/collection/*"
         element={<CollectionApp idToken={auth.idToken} onLogout={auth.logout} />}
       />
+      <Route path="/gatherer/*" element={<GathererApp onLogout={auth.logout} />} />
       <Route path="/books/edit" element={<Navigate to="/collection/books/edit" replace />} />
       <Route path="/books/new" element={<Navigate to="/collection/books/edit" replace />} />
       <Route path="/settings" element={<Navigate to="/cashbook/settings" replace />} />

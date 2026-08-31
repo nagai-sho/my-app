@@ -44,15 +44,9 @@ function parseAppsResponse(value: unknown): App[] {
   return sortApps(apps);
 }
 
-async function fetchApps(idToken: string | null): Promise<App[]> {
-  const headers = new Headers();
-  if (idToken) {
-    headers.set('Authorization', `Bearer ${idToken}`);
-  }
-
+async function fetchApps(): Promise<App[]> {
   const response = await fetch('/api/apps', {
     credentials: 'same-origin',
-    headers,
   });
   let body: unknown = null;
   try {
@@ -87,7 +81,7 @@ export function useApps(idToken: string | null): UseAppsResult {
     setIsLoading(true);
     setError(null);
 
-    void fetchApps(idToken)
+    void fetchApps()
       .then((nextApps) => {
         if (cancelled) {
           return;

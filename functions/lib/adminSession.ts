@@ -1,6 +1,6 @@
 import type { AppEnv } from './env';
 
-export const ADMIN_SESSION_COOKIE = 'my_app_admin_session';
+export const ADMIN_SESSION_COOKIE = 'my_app_session';
 export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 
 interface RequestLike {
@@ -10,6 +10,15 @@ interface RequestLike {
 
 interface AdminSessionRow {
   id_hash: string;
+  owner_id: string;
+  email: string | null;
+  display_name: string | null;
+}
+
+export interface AppSessionUser {
+  id: 'owner';
+  email: string;
+  name?: string;
 }
 
 function bytesToHex(bytes: Uint8Array): string {
@@ -88,16 +97,16 @@ export async function verifyAdminCredentials(
 export async function createAdminSession(
   env: AppEnv,
 ): Promise<{ token: string; expiresAt: number }> {
-  const now = Date.now();
-  const expiresAt = now + ADMIN_SESSION_MAX_AGE * 1000;
+  const now = Math.floor(Date.now() / 1000);
+  const expiresAt = now + ADMIN_SESSION_MAX_AGE;
   const token = crypto.randomUUID();
   const tokenHash = await sha256(token);
 
-  await env.DB.prepare('DELETE FROM admin_sessions WHERE expires_at <= ?').bind(now).run();
+  await env.DB.prepare('DELETE FROM app_sessions WHERE expires_at <= ?').bind(now).run();
   await env.DB.prepare(
-    'INSERT INTO admin_sessions (id_hash, created_at, expires_at) VALUES (?, ?, ?)',
+    'INSERT INTO app_sessions (id_hash, owner_id, created_at, expires_at) VALUES (?, ?, ?, ?)',
   )
-    .bind(tokenHash, now, expiresAt)
+    .bind(tokenHash, 'owner', now, expiresAt)
     .run();
 
   return { token, expiresAt };
@@ -107,19 +116,33 @@ export async function hasValidAdminSession(
   request: RequestLike,
   env: AppEnv,
 ): Promise<boolean> {
+  return Boolean(await getValidAppSession(request, env));
+}
+
+export async function getValidAppSession(
+  request: RequestLike,
+  env: AppEnv,
+): Promise<AppSessionUser | null> {
   const token = getCookie(request, ADMIN_SESSION_COOKIE);
-  if (!token) {
-    return false;
-  }
+  if (!token) return null;
 
   const tokenHash = await sha256(token);
   const row = await env.DB.prepare(
-    'SELECT id_hash FROM admin_sessions WHERE id_hash = ? AND expires_at > ? LIMIT 1',
+    `SELECT s.id_hash, s.owner_id, u.email, u.display_name
+       FROM app_sessions s
+       INNER JOIN app_users u ON u.id = s.owner_id
+      WHERE s.id_hash = ? AND s.expires_at > ?
+      LIMIT 1`,
   )
-    .bind(tokenHash, Date.now())
+    .bind(tokenHash, Math.floor(Date.now() / 1000))
     .first<AdminSessionRow>();
 
-  return Boolean(row?.id_hash);
+  if (!row?.id_hash || row.owner_id !== 'owner') return null;
+  return {
+    id: 'owner',
+    email: row.email?.trim() || 'admin@example.com',
+    ...(row.display_name ? { name: row.display_name } : {}),
+  };
 }
 
 export async function revokeAdminSession(
@@ -132,7 +155,7 @@ export async function revokeAdminSession(
   }
 
   const tokenHash = await sha256(token);
-  await env.DB.prepare('DELETE FROM admin_sessions WHERE id_hash = ?').bind(tokenHash).run();
+  await env.DB.prepare('DELETE FROM app_sessions WHERE id_hash = ?').bind(tokenHash).run();
 }
 
 function secureCookieAttribute(request: RequestLike): string {

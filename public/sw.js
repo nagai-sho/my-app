@@ -1,6 +1,6 @@
 /* global caches, fetch, Response, self, URL */
 
-const CACHE_NAME = 'my-app-shell-v1';
+const CACHE_NAME = 'my-app-shell-v2';
 const APP_SHELL = [
   '/',
   '/cashbook',
@@ -10,6 +10,12 @@ const APP_SHELL = [
   '/collection/books/detail',
   '/collection/gallery',
   '/collection/viewer',
+  '/gatherer',
+  '/gatherer/tasks',
+  '/gatherer/add',
+  '/gatherer/sources',
+  '/gatherer/runs',
+  '/gatherer/guide',
   '/word',
   '/word/cards',
   '/index.html',
@@ -18,6 +24,7 @@ const APP_SHELL = [
   '/icons/icon-512.svg',
   '/icons/cashbook.svg',
   '/icons/collection.svg',
+  '/icons/gatherer.svg',
 ];
 const DEV_PATH_PREFIXES = ['/@vite', '/src/', '/node_modules/', '/@react-refresh'];
 

@@ -4,13 +4,12 @@ interface AuthState {
   isAuthenticated: boolean;
   isCheckingSession: boolean;
   idToken: string | null;
-  loginWithGoogleToken: (token: string) => void;
+  loginWithGoogleToken: (token: string) => Promise<boolean>;
   loginWithAdminCredentials: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 export function useAuth(): AuthState {
-  const [googleToken, setGoogleToken] = useState<string | null>(null);
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
@@ -36,8 +35,20 @@ export function useAuth(): AuthState {
     };
   }, []);
 
-  const loginWithGoogleToken = useCallback((token: string) => {
-    setGoogleToken(token);
+  const loginWithGoogleToken = useCallback(async (credential: string) => {
+    try {
+      const response = await fetch('/api/auth/google', {
+        body: JSON.stringify({ credential }),
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+      if (!response.ok) return false;
+      setAdminAuthenticated(true);
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
   const loginWithAdminCredentials = useCallback(
@@ -64,7 +75,6 @@ export function useAuth(): AuthState {
   );
 
   const logout = useCallback(() => {
-    setGoogleToken(null);
     setAdminAuthenticated(false);
     void fetch('/api/auth/logout', {
       credentials: 'same-origin',
@@ -75,9 +85,10 @@ export function useAuth(): AuthState {
   }, []);
 
   return {
-    isAuthenticated: adminAuthenticated || Boolean(googleToken),
+    isAuthenticated: adminAuthenticated,
     isCheckingSession,
-    idToken: googleToken,
+    // API access is authenticated with the shared HttpOnly session cookie.
+    idToken: null,
     loginWithAdminCredentials,
     loginWithGoogleToken,
     logout,

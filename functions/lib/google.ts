@@ -11,6 +11,9 @@ export interface GoogleJwtClaims {
   iat?: number;
   iss?: string;
   nbf?: number;
+  name?: string;
+  picture?: string;
+  sub?: string;
 }
 
 interface GoogleJwk extends JsonWebKey {

@@ -40,7 +40,13 @@ export const onRequest: PagesFunction<AppEnv> = async ({ request, env }) => {
       200,
       { 'Set-Cookie': createSessionCookie(request, session.token) },
     );
-  } catch {
+  } catch (error) {
+    console.error(JSON.stringify({
+      level: 'error',
+      feature: 'auth',
+      event: 'admin_session_create_failed',
+      message: error instanceof Error ? error.message : String(error),
+    }));
     return jsonResponse<AppEnv>({ error: '予期せぬエラーが発生しました。' }, 500);
   }
 };

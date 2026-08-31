@@ -37,7 +37,6 @@ export function createCollectionApi(idToken: string | null): CollectionApi {
   const request = async (path: string, init: RequestInit = {}): Promise<Response> => {
     const headers = new Headers(init.headers);
     headers.set('accept', 'application/json');
-    if (idToken) headers.set('authorization', `Bearer ${idToken}`);
     return fetch(`${API_BASE}${path}`, {
       ...init,
       credentials: 'same-origin',

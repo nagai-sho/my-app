@@ -534,7 +534,7 @@ describe('App', () => {
         <WordApp idToken={null} onLogout={vi.fn()} />
       </MemoryRouter>,
     );
-    const cardDirectorySelect = screen.getByLabelText('カードのディレクトリ') as HTMLSelectElement;
+    const cardDirectorySelect = screen.getByLabelText('カードのディレクトリ') as unknown as HTMLSelectElement;
     const nestedDirectoryOption = cardDirectorySelect.querySelector('option[value="tense"]');
 
     expect(nestedDirectoryOption).toHaveTextContent('時制');
@@ -637,5 +637,4 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent('カードを登録しました。');
   });
 });
-
 

@@ -37,7 +37,7 @@ export interface CashbookApi {
 }
 
 export function createCashbookApi(idToken: string | null): CashbookApi {
-  const request = <T,>(path: string, init: RequestInit = {}) => requestJson<T>(path, init, idToken);
+  const request = <T,>(path: string, init: RequestInit = {}) => requestJson<T>(path, init);
 
   return {
     idToken,
@@ -85,10 +85,9 @@ export function createCashbookApi(idToken: string | null): CashbookApi {
   };
 }
 
-async function requestJson<T>(path: string, init: RequestInit, idToken: string | null): Promise<T> {
+async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set('Content-Type', 'application/json');
-  if (idToken) headers.set('Authorization', `Bearer ${idToken}`);
 
   const response = await fetch(path, {
     ...init,

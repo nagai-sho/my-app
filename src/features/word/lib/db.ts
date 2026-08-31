@@ -1,13 +1,19 @@
 import { rootFolder, starterCards } from './sampleData';
 import { DEFAULT_CARD_STATUS, isCardStatus } from './cardStatus';
+import {
+  cacheCard,
+  cacheFolder,
+  clearWordCache,
+  readCachedCards,
+  readCachedFolders,
+  removeCachedCard,
+} from './offlineCache';
 import type { Card, Folder } from '../types';
 
 async function apiJson<T>(path: string, init: RequestInit | undefined, idToken: string | null): Promise<T> {
+  void idToken;
   const headers = new Headers(init?.headers);
   headers.set('Content-Type', 'application/json');
-  if (idToken) {
-    headers.set('Authorization', `Bearer ${idToken}`);
-  }
 
   const response = await fetch(path, {
     ...init,
@@ -43,8 +49,16 @@ export async function ensureSeedData(idToken: string | null): Promise<void> {
 }
 
 export async function getCards(idToken: string | null): Promise<Card[]> {
-  const body = await apiJson<{ cards?: (Card & { status?: unknown })[] }>('/api/v1/word/cards', undefined, idToken);
-  return (body.cards ?? []).map(normalizeCard);
+  try {
+    const body = await apiJson<{ cards?: (Card & { status?: unknown })[] }>('/api/v1/word/cards', undefined, idToken);
+    const cards = (body.cards ?? []).map(normalizeCard);
+    await Promise.all(cards.map((card) => cacheCard(card).catch(() => undefined)));
+    return cards;
+  } catch (error) {
+    const cached = await readCachedCards().catch(() => []);
+    if (cached.length > 0) return cached.map(normalizeCard);
+    throw error;
+  }
 }
 
 export async function saveCard(card: Card, idToken: string | null): Promise<void> {
@@ -52,12 +66,14 @@ export async function saveCard(card: Card, idToken: string | null): Promise<void
     method: 'POST',
     body: JSON.stringify(card),
   }, idToken);
+  await cacheCard(card).catch(() => undefined);
 }
 
 export async function deleteCard(id: string, idToken: string | null): Promise<void> {
   await apiJson<{ ok: boolean }>(`/api/v1/word/cards?id=${encodeURIComponent(id)}`, {
     method: 'DELETE',
   }, idToken);
+  await removeCachedCard(id).catch(() => undefined);
 }
 
 export async function deleteFoldersAndCards(folderIds: Set<string>, idToken: string | null): Promise<void> {
@@ -67,11 +83,20 @@ export async function deleteFoldersAndCards(folderIds: Set<string>, idToken: str
   await apiJson<{ ok: boolean }>(`/api/v1/word/folders?id=${encodeURIComponent(folderId)}`, {
     method: 'DELETE',
   }, idToken);
+  await clearWordCache().catch(() => undefined);
 }
 
 export async function getFolders(idToken: string | null): Promise<Folder[]> {
-  const body = await apiJson<{ folders?: Folder[] }>('/api/v1/word/folders', undefined, idToken);
-  return body.folders ?? [];
+  try {
+    const body = await apiJson<{ folders?: Folder[] }>('/api/v1/word/folders', undefined, idToken);
+    const folders = body.folders ?? [];
+    await Promise.all(folders.map((folder) => cacheFolder(folder).catch(() => undefined)));
+    return folders;
+  } catch (error) {
+    const cached = await readCachedFolders().catch(() => []);
+    if (cached.length > 0) return cached;
+    throw error;
+  }
 }
 
 export async function saveFolder(folder: Folder, idToken: string | null): Promise<void> {
@@ -81,4 +106,5 @@ export async function saveFolder(folder: Folder, idToken: string | null): Promis
     method: 'POST',
     body: JSON.stringify(folder),
   }, idToken);
+  await cacheFolder(folder).catch(() => undefined);
 }

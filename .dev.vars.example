@@ -1,7 +1,10 @@
-# wrangler pages dev 用。管理者ログインの認証情報を設定します。
+# wrangler pages dev用。管理者ログインとgatherer連携の値を設定します。
 USER_NAME=admin@example.com
 PASSWORD=password
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 ALLOWED_GOOGLE_EMAILS=
 OWNER_GOOGLE_EMAIL=
+TAVILY_API_KEY=
+TAVILY_DAILY_CREDIT_LIMIT=30
+TAVILY_MONTHLY_CREDIT_LIMIT=900

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { renderGoogleButton } from '../lib/auth/google';
-import { appConfig } from '../lib/config';
+import { loadGoogleClientId } from '../lib/config';
 import styles from './LoginPage.module.css';
 
 interface LoginPageProps {
   onAdminLogin: (username: string, password: string) => Promise<boolean>;
-  onGoogleLogin: (token: string) => void;
+  onGoogleLogin: (token: string) => Promise<boolean>;
 }
 
 function AdminLoginForm({
@@ -70,37 +70,40 @@ function AdminLoginForm({
 function GoogleLogin({ onGoogleLogin }: Pick<LoginPageProps, 'onGoogleLogin'>): JSX.Element {
   const buttonRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let disposed = false;
     let cleanup: (() => void) | undefined;
 
-    if (!appConfig.googleClientId) {
-      setError('Google Client IDが設定されていません。');
-      return;
-    }
-
-    if (!buttonRef.current) {
-      return;
-    }
-
-    void renderGoogleButton(buttonRef.current, appConfig.googleClientId, (token) => {
-      if (!disposed) {
-        onGoogleLogin(token);
+    void (async () => {
+      const clientId = await loadGoogleClientId();
+      if (disposed) return;
+      if (!clientId) {
+        setError('Google Client IDが設定されていません。');
+        return;
       }
-    })
-      .then((dispose) => {
-        if (disposed) {
-          dispose();
-          return;
-        }
-        cleanup = dispose;
-      })
-      .catch((cause: unknown) => {
+      if (!buttonRef.current) return;
+
+      cleanup = await renderGoogleButton(buttonRef.current, clientId, (token) => {
         if (!disposed) {
-          setError(cause instanceof Error ? cause.message : 'Google認証を初期化できませんでした。');
+          setError('');
+          setIsSubmitting(true);
+          void onGoogleLogin(token)
+            .then((authenticated) => {
+              if (!authenticated && !disposed) setError('Google認証に失敗しました。');
+            })
+            .finally(() => {
+              if (!disposed) setIsSubmitting(false);
+            });
         }
       });
+      if (disposed) cleanup();
+    })().catch((cause: unknown) => {
+      if (!disposed) {
+        setError(cause instanceof Error ? cause.message : 'Google認証を初期化できませんでした。');
+      }
+    });
 
     return () => {
       disposed = true;
@@ -110,7 +113,7 @@ function GoogleLogin({ onGoogleLogin }: Pick<LoginPageProps, 'onGoogleLogin'>): 
 
   return (
     <div className={styles.googleLogin}>
-      <div ref={buttonRef} />
+      <div ref={buttonRef} aria-busy={isSubmitting} />
       {!error && <p className={styles.loading}>Google認証を準備しています…</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
     </div>
