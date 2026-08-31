@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AppGrid } from './components/AppGrid';
 import { AppHeader } from './components/AppHeader';
@@ -8,6 +8,7 @@ import { SkeletonGrid } from './components/SkeletonGrid';
 import { StatusState } from './components/StatusState';
 import { useAuth } from './features/auth/useAuth';
 import { useApps } from './features/apps/useApps';
+import { CashbookApp } from './features/cashbook/CashbookApp';
 import { WordApp } from './features/word/WordApp';
 import styles from './App.module.css';
 
@@ -89,6 +90,13 @@ export default function App(): JSX.Element {
 
   return (
     <Routes>
+      <Route
+        path="/cashbook/*"
+        element={<CashbookApp idToken={auth.idToken} onLogout={auth.logout} />}
+      />
+      <Route path="/settings" element={<Navigate to="/cashbook/settings" replace />} />
+      <Route path="/transactions" element={<Navigate to="/cashbook" replace />} />
+      <Route path="/categories" element={<Navigate to="/cashbook/settings" replace />} />
       <Route
         path="/word/*"
         element={<WordApp idToken={auth.idToken} onLogout={auth.logout} />}

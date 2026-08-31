@@ -25,4 +25,4 @@
 
 ## 構成上の整理
 
-word-appの独立Worker、`APP_DB` バインディング、独自OAuth用の `GOOGLE_CLIENT_SECRET`、`GOOGLE_REDIRECT_URI`、`SESSION_SECRET` はmy-appでは使用しない。画面は `src/features/word/`、Pages Functions APIは `functions/api/v1/word/` に配置する。
+word-appの独立Worker、`APP_DB` バインディング、word-app独自OAuth用の `GOOGLE_CLIENT_SECRET`、`GOOGLE_REDIRECT_URI`、`SESSION_SECRET` は使用しない。画面は `src/features/word/`、Pages Functions APIは `functions/api/v1/word/` に配置する。なお、`GOOGLE_CLIENT_SECRET` はcashbook-appのGmail OAuth用途では使用する。

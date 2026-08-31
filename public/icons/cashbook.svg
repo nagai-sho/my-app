@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="cashbook-icon-title">
+  <title id="cashbook-icon-title">Cashbook app icon</title>
+  <rect width="512" height="512" rx="112" fill="#0f766e"/>
+  <rect x="98" y="86" width="316" height="340" rx="42" fill="#f8fafc"/>
+  <rect x="132" y="128" width="248" height="48" rx="16" fill="#ccfbf1"/>
+  <rect x="132" y="208" width="108" height="34" rx="17" fill="#14b8a6"/>
+  <rect x="272" y="208" width="108" height="34" rx="17" fill="#0f766e"/>
+  <rect x="132" y="274" width="108" height="34" rx="17" fill="#99f6e4"/>
+  <rect x="272" y="274" width="108" height="34" rx="17" fill="#14b8a6"/>
+  <rect x="132" y="340" width="108" height="34" rx="17" fill="#0f766e"/>
+  <path d="M305 371c0 28-22 50-50 50s-50-22-50-50 22-50 50-50 50 22 50 50Z" fill="#facc15"/>
+  <path d="M255 340v62M224 371h62" stroke="#713f12" stroke-width="22" stroke-linecap="round"/>
+</svg>
+

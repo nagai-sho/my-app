@@ -23,3 +23,9 @@
 ## word-appの統合
 
 my-appを複数アプリ共通の単一サイトとし、word-appを `/word` と `/word/cards` に統合した。word-appの独立Worker、独自OAuth画面、`APP_DB` バインディングは採用せず、画面は `src/features/word/`、APIは `functions/api/v1/word/`、D1は共通の `DB` バインディングを使用する。word-appのカード・フォルダ用テーブルはmy-appのmigration番号 `0004`〜`0008` に移設し、`0009` でランチャー項目を登録する。word APIの認証はmy-appの管理者セッションまたはGoogle IDトークンに統一する。
+
+## cashbook-appの統合
+
+cashbook-appも同じ単一サイトへ移設し、画面を `src/features/cashbook/`、APIを `functions/api/v1/cashbook/` と `functions/lib/cashbook*`、D1を共通の `DB` bindingへ統合した。Cashbook固有のテーブル名には `cashbook_` prefixを付け、word-appのテーブルや既存の `app_oauth_states` と衝突させない。Gmail OAuthの一時stateは `cashbook_oauth_states` に分離する。
+
+word-appの独自OAuth用Secretは使用しないが、CashbookのGmail OAuthでは `GOOGLE_CLIENT_SECRET` を使用する。どのアプリから呼び出しても認証入口はmy-appの管理者セッションまたはGoogle IDトークンに統一する。

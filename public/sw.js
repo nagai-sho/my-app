@@ -1,7 +1,18 @@
 /* global caches, fetch, Response, self, URL */
 
 const CACHE_NAME = 'my-app-shell-v1';
-const APP_SHELL = ['/', '/word', '/word/cards', '/index.html', '/manifest.webmanifest', '/icons/icon-192.svg', '/icons/icon-512.svg'];
+const APP_SHELL = [
+  '/',
+  '/cashbook',
+  '/cashbook/settings',
+  '/word',
+  '/word/cards',
+  '/index.html',
+  '/manifest.webmanifest',
+  '/icons/icon-192.svg',
+  '/icons/icon-512.svg',
+  '/icons/cashbook.svg',
+];
 const DEV_PATH_PREFIXES = ['/@vite', '/src/', '/node_modules/', '/@react-refresh'];
 
 function isApiRequest(pathname) {
