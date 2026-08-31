@@ -9,7 +9,15 @@ function readBoolean(value: string | undefined, fallback: boolean): boolean {
 }
 
 function readApiMode(value: string | undefined): ApiMode {
-  return value === 'real' ? 'real' : 'mock';
+  if (value === 'real') {
+    return 'real';
+  }
+  if (value === 'mock') {
+    return 'mock';
+  }
+
+  // ローカル開発はモック、本番ビルドはPages Functions + D1を既定にする。
+  return import.meta.env.PROD ? 'real' : 'mock';
 }
 
 export const appConfig = {

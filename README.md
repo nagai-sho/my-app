@@ -37,7 +37,7 @@ npm run preview
 - `VITE_ENABLE_DEV_LOGIN`: `true` で簡易ログインを表示
 - `VITE_DEV_USER`: 簡易ログインのユーザー名
 - `VITE_DEV_PASSWORD`: 簡易ログインのパスワード
-- `VITE_API_MODE`: `mock` または `real`
+- `VITE_API_MODE`: `mock` または `real`。未設定時はローカル開発で `mock`、本番ビルドで `real`
 - `VITE_GOOGLE_CLIENT_ID`: 本番のGoogle Identity Services用Client ID
 
 ### Pages Functions / wrangler

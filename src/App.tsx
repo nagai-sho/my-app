@@ -84,7 +84,7 @@ export default function App(): JSX.Element {
         onAdminLogin={handleAdminLogin}
         onDevLogin={auth.loginWithDevCredentials}
         onGoogleLogin={handleGoogleLogin}
-        showAdminLogin={appConfig.apiMode === 'real'}
+        showAdminLogin={!appConfig.enableDevLogin || appConfig.apiMode === 'real'}
       />
     );
   }
