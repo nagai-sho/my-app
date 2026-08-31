@@ -1,37 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { appConfig } from '../../lib/config';
-import {
-  clearDevLoggedIn,
-  isDevLoggedIn,
-  setDevLoggedIn,
-  validateDevCredentials,
-} from '../../lib/auth/devAuth';
-
 interface AuthState {
   isAuthenticated: boolean;
   isCheckingSession: boolean;
   idToken: string | null;
-  loginWithDevCredentials: (user: string, password: string) => boolean;
   loginWithGoogleToken: (token: string) => void;
   loginWithAdminCredentials: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 export function useAuth(): AuthState {
-  const [devAuthenticated, setDevAuthenticated] = useState(
-    () => appConfig.enableDevLogin && isDevLoggedIn(),
-  );
   const [googleToken, setGoogleToken] = useState<string | null>(null);
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
-  const shouldCheckSession = appConfig.apiMode === 'real';
-  const [isCheckingSession, setIsCheckingSession] = useState(shouldCheckSession);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   useEffect(() => {
-    if (!shouldCheckSession) {
-      return;
-    }
-
     let cancelled = false;
     void fetch('/api/auth/session', { credentials: 'same-origin' })
       .then((response) => {
@@ -40,7 +23,7 @@ export function useAuth(): AuthState {
         }
       })
       .catch(() => {
-        // API未起動時はログイン画面を表示し、手動ログインを可能にする。
+        // API未起動時は未認証としてログイン画面を表示する。
       })
       .finally(() => {
         if (!cancelled) {
@@ -51,22 +34,6 @@ export function useAuth(): AuthState {
     return () => {
       cancelled = true;
     };
-  }, [shouldCheckSession]);
-
-  const loginWithDevCredentials = useCallback((user: string, password: string) => {
-    const valid = validateDevCredentials(
-      user,
-      password,
-      appConfig.devUser,
-      appConfig.devPassword,
-    );
-
-    if (valid) {
-      setDevLoggedIn();
-      setDevAuthenticated(true);
-    }
-
-    return valid;
   }, []);
 
   const loginWithGoogleToken = useCallback((token: string) => {
@@ -97,26 +64,20 @@ export function useAuth(): AuthState {
   );
 
   const logout = useCallback(() => {
-    clearDevLoggedIn();
-    setDevAuthenticated(false);
     setGoogleToken(null);
     setAdminAuthenticated(false);
-
-    if (appConfig.apiMode === 'real') {
-      void fetch('/api/auth/logout', {
-        credentials: 'same-origin',
-        method: 'POST',
-      }).catch(() => {
-        // ローカル状態は先に破棄し、API障害で画面に残らないようにする。
-      });
-    }
+    void fetch('/api/auth/logout', {
+      credentials: 'same-origin',
+      method: 'POST',
+    }).catch(() => {
+      // ローカル状態は先に破棄し、API障害で画面に残らないようにする。
+    });
   }, []);
 
   return {
-    isAuthenticated: devAuthenticated || adminAuthenticated || Boolean(googleToken),
+    isAuthenticated: adminAuthenticated || Boolean(googleToken),
     isCheckingSession,
     idToken: googleToken,
-    loginWithDevCredentials,
     loginWithAdminCredentials,
     loginWithGoogleToken,
     logout,

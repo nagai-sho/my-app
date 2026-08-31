@@ -18,10 +18,6 @@ interface AppRow {
   updated_at: number;
 }
 
-function isBypassAuthEnabled(env: AppEnv): boolean {
-  return env.BYPASS_AUTH?.toLowerCase() === 'true';
-}
-
 function getAllowedEmails(value: string | undefined): Set<string> {
   return new Set(
     (value ?? '')
@@ -35,10 +31,6 @@ async function isAuthorized(
   request: { url: string; headers: Pick<Headers, 'get'> },
   env: AppEnv,
 ): Promise<boolean> {
-  if (isBypassAuthEnabled(env)) {
-    return true;
-  }
-
   try {
     if (await hasValidAdminSession(request, env)) {
       return true;

@@ -7,12 +7,11 @@ import { SkeletonGrid } from './components/SkeletonGrid';
 import { StatusState } from './components/StatusState';
 import { useAuth } from './features/auth/useAuth';
 import { useApps } from './features/apps/useApps';
-import { appConfig } from './lib/config';
 import styles from './App.module.css';
 
 function Dashboard({ idToken, onLogout }: { idToken: string | null; onLogout: () => void }): JSX.Element {
   const [openInNewTab, setOpenInNewTab] = useState(false);
-  const { apps, error, isLoading, retry } = useApps(appConfig.apiMode, idToken);
+  const { apps, error, isLoading, retry } = useApps(idToken);
 
   return (
     <div className={styles.appShell}>
@@ -80,11 +79,8 @@ export default function App(): JSX.Element {
   if (!auth.isAuthenticated) {
     return (
       <LoginPage
-        enableDevLogin={appConfig.enableDevLogin}
         onAdminLogin={handleAdminLogin}
-        onDevLogin={auth.loginWithDevCredentials}
         onGoogleLogin={handleGoogleLogin}
-        showAdminLogin={!appConfig.enableDevLogin || appConfig.apiMode === 'real'}
       />
     );
   }

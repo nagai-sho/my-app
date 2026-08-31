@@ -15,3 +15,7 @@
 ## 管理者ログイン
 
 ユーザー要望により、Google認証に加えて `USER_NAME` / `PASSWORD` による管理者ログインを追加した。資格情報はブラウザへ埋め込まず、`POST /api/auth/login` でFunctions側だけが照合する。成功時はランダムなセッションIDのSHA-256ハッシュをD1へ保存し、HttpOnly・SameSite Cookieを発行する。`/api/apps` はこのセッションまたはGoogle IDトークンのいずれかが有効な場合に一覧を返す。
+
+## 認証とAPIモードの一本化
+
+ユーザー要望により、開発用ログイン、認証バイパス、モック/実API切替、実行環境識別を廃止した。対象は `VITE_ENABLE_DEV_LOGIN`、`BYPASS_AUTH`、`VITE_API_MODE`、`RUNTIME_ENV` である。フロントエンドは常にPages FunctionsのAPIを呼び出し、認証はGoogleログインまたは `USER_NAME` / `PASSWORD` による管理者ログインに統一する。ローカル確認も `wrangler pages dev` とローカルD1を使う。

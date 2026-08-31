@@ -5,59 +5,8 @@ import { appConfig } from '../lib/config';
 import styles from './LoginPage.module.css';
 
 interface LoginPageProps {
-  enableDevLogin: boolean;
   onAdminLogin: (username: string, password: string) => Promise<boolean>;
-  onDevLogin: (user: string, password: string) => boolean;
   onGoogleLogin: (token: string) => void;
-  showAdminLogin: boolean;
-}
-
-function DevLoginForm({ onDevLogin }: Pick<LoginPageProps, 'onDevLogin'>): JSX.Element {
-  const [user, setUser] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (onDevLogin(user, password)) {
-      return;
-    }
-    setError('ユーザー名またはパスワードが正しくありません。');
-  }
-
-  return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <label className={styles.label} htmlFor="dev-user">
-        ユーザー名
-      </label>
-      <input
-        id="dev-user"
-        className={styles.input}
-        type="email"
-        autoComplete="username"
-        value={user}
-        onChange={(event) => setUser(event.target.value)}
-        required
-      />
-      <label className={styles.label} htmlFor="dev-password">
-        パスワード
-      </label>
-      <input
-        id="dev-password"
-        className={styles.input}
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-        required
-      />
-      {error && <p className={styles.error} role="alert">{error}</p>}
-      <button type="submit" className={styles.submitButton}>
-        ログイン
-      </button>
-      <p className={styles.hint}>ローカル確認用: admin@example.com / password</p>
-    </form>
-  );
 }
 
 function AdminLoginForm({
@@ -168,13 +117,7 @@ function GoogleLogin({ onGoogleLogin }: Pick<LoginPageProps, 'onGoogleLogin'>): 
   );
 }
 
-export function LoginPage({
-  enableDevLogin,
-  onAdminLogin,
-  onDevLogin,
-  onGoogleLogin,
-  showAdminLogin,
-}: LoginPageProps): JSX.Element {
+export function LoginPage({ onAdminLogin, onGoogleLogin }: LoginPageProps): JSX.Element {
   return (
     <main className={styles.page}>
       <section className={styles.panel} aria-labelledby="login-title">
@@ -182,20 +125,14 @@ export function LoginPage({
         <p className={styles.eyebrow}>PERSONAL APP LAUNCHER</p>
         <h1 id="login-title" className={styles.title}>my-app</h1>
         <p className={styles.subtitle}>登録したアプリへ、すばやくアクセス。</p>
-        {enableDevLogin ? (
-          <DevLoginForm onDevLogin={onDevLogin} />
-        ) : (
-          <GoogleLogin onGoogleLogin={onGoogleLogin} />
-        )}
-        {showAdminLogin && (
-          <div className={styles.adminLogin}>
-            <div className={styles.divider}>
-              <span>または</span>
-            </div>
-            <p className={styles.adminTitle}>管理者ログイン</p>
-            <AdminLoginForm onAdminLogin={onAdminLogin} />
+        <GoogleLogin onGoogleLogin={onGoogleLogin} />
+        <div className={styles.adminLogin}>
+          <div className={styles.divider}>
+            <span>または</span>
           </div>
-        )}
+          <p className={styles.adminTitle}>管理者ログイン</p>
+          <AdminLoginForm onAdminLogin={onAdminLogin} />
+        </div>
       </section>
     </main>
   );

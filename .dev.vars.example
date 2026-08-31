@@ -1,6 +1,4 @@
-# wrangler pages dev 用。ローカルD1を認証なしで確認する場合に使います。
-BYPASS_AUTH=true
-RUNTIME_ENV=preview
+# wrangler pages dev 用。管理者ログインの認証情報を設定します。
 USER_NAME=admin@example.com
 PASSWORD=password
 GOOGLE_CLIENT_ID=

@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import appsJson from './mock/apps.json';
 import { sortApps } from './sortApps';
 import type { App } from '../../types/app';
-import type { ApiMode } from '../../lib/config';
 
 interface AppsResponse {
   apps: App[];
@@ -46,11 +44,7 @@ function parseAppsResponse(value: unknown): App[] {
   return sortApps(apps);
 }
 
-async function fetchApps(apiMode: ApiMode, idToken: string | null): Promise<App[]> {
-  if (apiMode === 'mock') {
-    return sortApps(appsJson as App[]);
-  }
-
+async function fetchApps(idToken: string | null): Promise<App[]> {
   const headers = new Headers();
   if (idToken) {
     headers.set('Authorization', `Bearer ${idToken}`);
@@ -78,7 +72,7 @@ async function fetchApps(apiMode: ApiMode, idToken: string | null): Promise<App[
   return parseAppsResponse(body);
 }
 
-export function useApps(apiMode: ApiMode, idToken: string | null): UseAppsResult {
+export function useApps(idToken: string | null): UseAppsResult {
   const [apps, setApps] = useState<App[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +87,7 @@ export function useApps(apiMode: ApiMode, idToken: string | null): UseAppsResult
     setIsLoading(true);
     setError(null);
 
-    void fetchApps(apiMode, idToken)
+    void fetchApps(idToken)
       .then((nextApps) => {
         if (cancelled) {
           return;
@@ -116,7 +110,7 @@ export function useApps(apiMode: ApiMode, idToken: string | null): UseAppsResult
     return () => {
       cancelled = true;
     };
-  }, [apiMode, idToken, retryCount]);
+  }, [idToken, retryCount]);
 
   return { apps, isLoading, error, retry };
 }
