@@ -86,7 +86,7 @@ npm run d1:migrate:local
 npm run d1:migrate
 ```
 
-`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が旧管理者セッションの履歴、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目、`0014_gatherer_initial.sql` がgathererのテーブル、`0015_app_sessions.sql` が共通セッション、`0016_gatherer_app_entry.sql` がgathererのランチャー項目、`0017_tasks_initial.sql` がTasksのテーブルとランチャー項目、`0018_external_links.sql` がアプリ区分と外部リンク3件を作成します。
+`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が旧管理者セッションの履歴、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目、`0014_gatherer_initial.sql` がgathererのテーブル、`0015_app_sessions.sql` が共通セッション、`0016_gatherer_app_entry.sql` がgathererのランチャー項目、`0017_tasks_initial.sql` がTasksのテーブルとランチャー項目、`0018_external_links.sql` がアプリ区分と外部リンク3件、`0019_remove_unused_launcher_apps.sql` が未使用の予定管理・リンク集、`0020_add_ip_expand_link.sql` がIP Expandを追加します。
 
 collection-appの画像・PDFは、既存のR2バケット `collection-app-image` を `COLLECTION_R2` bindingとして参照します。既存データのR2キーは移行時に変更せず、APIが旧キーをフォールバック参照します。
 
