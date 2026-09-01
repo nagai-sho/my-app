@@ -9,7 +9,7 @@
 - `src/features/collection/`: collection-appの書籍一覧、ギャラリー、アップロード、ビューアをまとめる。
 - `src/features/tasks/`: 個人タスクの一覧、検索、状態変更、編集をまとめる。
 - `src/lib/auth/`: Google Identity Servicesのブラウザ連携を担当する。
-- `functions/api/`: my-appの共通Pages Functions APIハンドラ。Google credentialはサーバーで検証して共通HttpOnlyセッションへ交換し、以後はセッションCookieだけを検証する。`api/v1/cashbook/` はCashbookのCRUD・集計・Gmail API、`api/v1/collection/` はcollectionの文書・フォルダ・ファイルAPI、`api/v1/gatherer/` は情報源・収集結果・実行履歴APIを扱う。
+- `functions/api/`: my-appの共通Pages Functions APIハンドラ。Google credentialはサーバーで検証して共通HttpOnlyセッションへ交換し、以後はセッションCookieだけを検証する。`api/v1/cashbook/` はCashbookのCRUD・集計・Gmail API、`api/v1/collection/` はcollectionの文書・フォルダ・ファイルAPI、`api/v1/gatherer/` は情報源・収集結果・実行履歴API、`api/v1/tasks/` は個人タスクのCRUD APIを扱う。
 - `migrations/`: D1の正規データ構造と初期データを管理する。
 - `public/`: 統合サイトのPWA manifest、Service Worker、アイコンを管理する。
 - `functions/_scheduled.ts`: gathererの定期収集ロジックに接続するスケジュール入口を管理する。静的ファイルはPagesから配信する。
