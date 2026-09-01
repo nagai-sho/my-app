@@ -27,6 +27,7 @@ npm run dev:pages
 - `/word/cards`: カード・ディレクトリの編集、CSV入出力
 - `/collection`: 画像・PDFの書籍整理、アップロード、並び替え、閲覧
 - `/gatherer`: 情報源の登録、記事収集、既読管理、実行履歴
+- `/tasks`: 期限・優先度・ステータス付きの個人タスク管理
 
 cashbook-app、word-app、collection-app、gatherer-appの画面・API・D1データは、my-app内の機能として共通ビルド・Pages Functions・認証を利用します。
 移設内容の詳細は [cashbook-app統合メモ](doc/cashbook-app-integration.md) と [word-app統合メモ](doc/word-app-integration.md) を参照してください。
@@ -103,6 +104,7 @@ collection-appの画像・PDFは、既存のR2バケット `collection-app-image
 - Cashbook: `/api/v1/cashbook/categories`、`/merchants`、`/transactions`、`/summary`、`/settings`、`/gmail/*`
 - CashbookのGmail OAuth: `/api/v1/cashbook/gmail/connect` と `/api/v1/cashbook/gmail/callback`
 - Gatherer: `/api/v1/gatherer/items`、`/sources`、`/rules`、`/tasks`、`/collect`、`/runs`
+- Tasks: `/api/v1/tasks`（一覧、作成、更新、削除）
 
 Pages FunctionsはGoogle credentialの署名、`exp`、`aud`、issuer、メール検証済みフラグ、許可メールアドレスを確認します。共通セッションのトークンはハッシュ化して`app_sessions`へ保存します。
 
@@ -114,6 +116,7 @@ Pages FunctionsはGoogle credentialの署名、`exp`、`aud`、issuer、メー�
 - `src/features/word/`: word-appの学習・編集画面、カード操作、CSV、フォルダ機能
 - `src/features/collection/`: collection-appの書籍、ギャラリー、ファイルビューア、R2/D1連携
 - `src/features/gatherer/`: 情報源、収集結果、タスク、実行履歴
+- `src/features/tasks/`: タスク一覧、検索・フィルター、編集
 - `src/features/auth/`: 認証状態の管理
 - `src/lib/auth/`: Google Identity Services連携
 - `functions/api/`: my-appの共通Pages Functions APIハンドラ。`api/v1/cashbook/`、`api/v1/collection/`、`api/v1/gatherer/`、`api/v1/word/` に各機能APIを含む

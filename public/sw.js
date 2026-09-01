@@ -16,6 +16,7 @@ const APP_SHELL = [
   '/gatherer/sources',
   '/gatherer/runs',
   '/gatherer/guide',
+  '/tasks',
   '/word',
   '/word/cards',
   '/index.html',
@@ -25,6 +26,7 @@ const APP_SHELL = [
   '/icons/cashbook.svg',
   '/icons/collection.svg',
   '/icons/gatherer.svg',
+  '/icons/tasks.svg',
 ];
 const DEV_PATH_PREFIXES = ['/@vite', '/src/', '/node_modules/', '/@react-refresh'];
 
