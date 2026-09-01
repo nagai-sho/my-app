@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { sortApps } from './sortApps';
-import type { App } from '../../types/app';
+import type { App, AppCategory } from '../../types/app';
 
 interface AppsResponse {
   apps: App[];
@@ -24,11 +24,16 @@ function isApp(value: unknown): value is App {
     typeof candidate.id === 'string' &&
     typeof candidate.name === 'string' &&
     typeof candidate.url === 'string' &&
+    (candidate.category === undefined || isAppCategory(candidate.category)) &&
     typeof candidate.sortOrder === 'number' &&
     typeof candidate.pinned === 'boolean' &&
     typeof candidate.createdAt === 'number' &&
     typeof candidate.updatedAt === 'number'
   );
+}
+
+function isAppCategory(value: unknown): value is AppCategory {
+  return value === 'integrated' || value === 'external';
 }
 
 function parseAppsResponse(value: unknown): App[] {
@@ -41,7 +46,10 @@ function parseAppsResponse(value: unknown): App[] {
     throw new Error('アプリ一覧のデータが正しくありません。');
   }
 
-  return sortApps(apps);
+  return sortApps(apps.map((app) => ({
+    ...app,
+    category: isAppCategory(app.category) ? app.category : 'integrated',
+  })));
 }
 
 async function fetchApps(): Promise<App[]> {

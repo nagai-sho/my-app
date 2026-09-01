@@ -9,6 +9,7 @@ interface AppRow {
   name: string;
   url: string;
   description: string | null;
+  category: string | null;
   sort_order: number;
   icon_url: string | null;
   pinned: number;
@@ -64,6 +65,7 @@ function toApp(row: AppRow) {
     name: row.name,
     url: parseAppUrl(row.url, 'url'),
     ...(row.description ? { description: row.description } : {}),
+    category: row.category === 'external' ? 'external' : 'integrated',
     sortOrder,
     ...(iconUrl ? { iconUrl } : {}),
     pinned: row.pinned === 1,
@@ -84,7 +86,7 @@ export const onRequest: PagesFunction<AppEnv> = async ({ request, env }) => {
 
   try {
     const result = await env.DB.prepare(
-      `SELECT id, name, url, description, sort_order, icon_url, pinned, tags, created_at, updated_at
+      `SELECT id, name, url, description, category, sort_order, icon_url, pinned, tags, created_at, updated_at
        FROM apps
        ORDER BY pinned DESC, sort_order ASC, name COLLATE NOCASE ASC`,
     ).all<AppRow>();

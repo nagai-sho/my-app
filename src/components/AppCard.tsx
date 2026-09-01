@@ -1,4 +1,5 @@
 import { forwardRef, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 
 import { getMonogram, getMonogramColor } from '../features/apps/monogram';
 import type { App } from '../types/app';
@@ -16,15 +17,17 @@ export const AppCard = forwardRef<HTMLAnchorElement, AppCardProps>(function AppC
 ) {
   const [imageFailed, setImageFailed] = useState(false);
   const shouldShowImage = Boolean(app.iconUrl) && !imageFailed;
+  const isExternal = app.category === 'external';
+  const opensInNewTab = openInNewTab || isExternal;
 
   return (
     <a
       ref={ref}
-      className={styles.card}
+      className={isExternal ? `${styles.card} ${styles.externalCard}` : styles.card}
       href={app.url}
-      target={openInNewTab ? '_blank' : undefined}
-      rel={openInNewTab ? 'noreferrer' : undefined}
-      aria-label={`${app.name}を開く`}
+      target={opensInNewTab ? '_blank' : undefined}
+      rel={opensInNewTab ? 'noreferrer' : undefined}
+      aria-label={isExternal ? `${app.name}を外部リンクで開く` : `${app.name}を開く`}
       onKeyDown={onKeyDown}
     >
       <span className={styles.icon} style={{ backgroundColor: getMonogramColor(app.name) }}>
@@ -41,6 +44,12 @@ export const AppCard = forwardRef<HTMLAnchorElement, AppCardProps>(function AppC
       </span>
       <span className={styles.name}>{app.name}</span>
       <span className={styles.description}>{app.description || '説明はありません'}</span>
+      {isExternal && (
+        <span className={styles.externalBadge}>
+          <ExternalLink size={12} aria-hidden="true" />
+          外部リンク
+        </span>
+      )}
       {app.pinned && (
         <span className={styles.pinned} title="ピン留め済み" aria-label="ピン留め済み">
           ★

@@ -86,7 +86,7 @@ npm run d1:migrate:local
 npm run d1:migrate
 ```
 
-`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が旧管理者セッションの履歴、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目、`0014_gatherer_initial.sql` がgathererのテーブル、`0015_app_sessions.sql` が共通セッション、`0016_gatherer_app_entry.sql` がgathererのランチャー項目、`0017_tasks_initial.sql` がTasksのテーブルとランチャー項目を作成します。
+`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が旧管理者セッションの履歴、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目、`0014_gatherer_initial.sql` がgathererのテーブル、`0015_app_sessions.sql` が共通セッション、`0016_gatherer_app_entry.sql` がgathererのランチャー項目、`0017_tasks_initial.sql` がTasksのテーブルとランチャー項目、`0018_external_links.sql` がアプリ区分と外部リンク3件を作成します。
 
 collection-appの画像・PDFは、既存のR2バケット `collection-app-image` を `COLLECTION_R2` bindingとして参照します。既存データのR2キーは移行時に変更せず、APIが旧キーをフォールバック参照します。
 
@@ -100,6 +100,7 @@ collection-appの画像・PDFは、既存のR2バケット `collection-app-image
 - 管理者ログイン: `POST /api/auth/login` で `USER_NAME` / `PASSWORD` を照合し、HttpOnlyセッションCookieを発行
 - 共通セッション: `GET /api/auth/session` で再読込時のログイン状態を確認、`POST /api/auth/logout` で破棄
 - D1から `pinned DESC, sort_order ASC, name ASC` で取得
+- `category` は `integrated`（統合アプリ）または `external`（外部リンク）で、外部リンクは一覧上で区分表示し新しいタブで開く
 - 外部の `url` と `icon_url` は `https`、統合アプリは `/` から始まる同一サイトのパスを許可
 - Cashbook: `/api/v1/cashbook/categories`、`/merchants`、`/transactions`、`/summary`、`/settings`、`/gmail/*`
 - CashbookのGmail OAuth: `/api/v1/cashbook/gmail/connect` と `/api/v1/cashbook/gmail/callback`

@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS apps (
   name TEXT NOT NULL,
   url TEXT NOT NULL,
   description TEXT,
+  category TEXT NOT NULL DEFAULT 'integrated', -- integrated / external; added in 0018
   sort_order INTEGER NOT NULL DEFAULT 0,
   icon_url TEXT,
   pinned INTEGER NOT NULL DEFAULT 0, -- 0/1
@@ -214,7 +215,7 @@ API 仕様
 - GET /api/apps
   - 認証: 本番で Google ID トークン必須
   - クエリ: なし（MVP）。サーバ側で ORDER BY pinned DESC, sort_order ASC, name ASC
-  - レスポンス: { apps: App[] }（iconUrl は DB の icon_url を変換）
+  - レスポンス: { apps: App[] }（iconUrl は DB の icon_url を変換、category は integrated/external）
   - エラー: { error: string }
 
 データ整合

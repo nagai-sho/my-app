@@ -7,6 +7,7 @@ const createApp = (overrides: Partial<App>): App => ({
   id: 'default',
   name: 'Default',
   url: 'https://example.com',
+  category: 'integrated',
   sortOrder: 0,
   pinned: false,
   createdAt: 0,

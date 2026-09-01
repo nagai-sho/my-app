@@ -20,6 +20,16 @@
   transform: translateY(-2px);
 }
 
+.externalCard {
+  border-color: #e0daf5;
+  background: linear-gradient(145deg, #fff 0%, #fbfaff 100%);
+}
+
+.externalCard:hover {
+  border-color: #c7bce8;
+  box-shadow: 0 12px 24px rgb(93 74 166 / 12%);
+}
+
 .card:focus-visible {
   outline: 3px solid #86a8ff;
   outline-offset: 3px;
@@ -65,6 +75,20 @@
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.externalBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  align-self: flex-start;
+  margin-top: .7rem;
+  padding: .23rem .45rem;
+  border-radius: 6px;
+  color: #725ba8;
+  background: #f0edff;
+  font-size: .63rem;
+  font-weight: 800;
 }
 
 .pinned {
