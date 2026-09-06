@@ -719,7 +719,7 @@
   font-size: .88rem;
 }
 
-.editorForm textarea { min-height: 100px; resize: vertical; }
+.editorForm textarea { min-height: 44px; overflow: hidden; resize: none; }
 .optional { color: #a4acbd; font-size: .67rem; font-weight: 600; }
 .editorGrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
 .validationError { margin: -.15rem 0 0; color: #bd4e58; font-size: .76rem; }

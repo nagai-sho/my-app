@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
@@ -425,6 +425,7 @@ function TaskEditorModal({ task, isSaving, onClose, onSubmit }: { task: Task | n
   const [draft, setDraft] = useState<TaskDraft>(() => toDraft(task));
   const [validationError, setValidationError] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setDraft(toDraft(task));
@@ -439,6 +440,13 @@ function TaskEditorModal({ task, isSaving, onClose, onSubmit }: { task: Task | n
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isSaving, onClose]);
+
+  useLayoutEffect(() => {
+    const textarea = descriptionRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [draft.description]);
 
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -473,7 +481,7 @@ function TaskEditorModal({ task, isSaving, onClose, onSubmit }: { task: Task | n
           </label>
           <label>
             メモ <span className={styles.optional}>任意</span>
-            <textarea value={draft.description} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} maxLength={2_000} placeholder="補足や手順を書いておけます" rows={4} />
+            <textarea ref={descriptionRef} value={draft.description} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} maxLength={2_000} placeholder="補足や手順を書いておけます" rows={1} />
           </label>
           <div className={styles.editorGrid}>
             <label>
