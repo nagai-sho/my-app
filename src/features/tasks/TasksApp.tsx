@@ -381,6 +381,7 @@ function TaskLine({
   function save(): void {
     if (!draft.title.trim()) return;
     if (!hasChanges || busy) return;
+    setDetailsOpen(false);
     onSave({
       title: draft.title.trim(),
       category: draft.category.trim() || DEFAULT_TASK_CATEGORY,
