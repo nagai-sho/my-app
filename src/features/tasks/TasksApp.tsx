@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Check, CheckCircle2, House, LogOut, Pencil, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, Check, CheckCircle2, ChevronDown, House, LogOut, Pencil, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { tasksApi, todayJst, type Task, type TaskInput, type TaskPriority, type TaskStatus } from './apiClient';
@@ -11,6 +11,7 @@ interface TasksAppProps {
 }
 
 type NotebookFilter = 'pending' | 'done' | 'all';
+type NotebookSort = 'manual' | 'created-desc' | 'title-asc' | 'due-asc' | 'priority-desc';
 
 const filterLabels: Record<NotebookFilter, string> = {
   pending: '未完了',
@@ -30,12 +31,23 @@ const statusLabels: Record<TaskStatus, string> = {
   done: '完了',
 };
 
+const sortLabels: Record<NotebookSort, string> = {
+  manual: '入力順',
+  'created-desc': '新しい順',
+  'title-asc': '名前順',
+  'due-asc': '期限順',
+  'priority-desc': '優先度順',
+};
+
+const priorityRank: Record<TaskPriority, number> = { high: 0, medium: 1, low: 2 };
+
 const EMPTY_TASKS: Task[] = [];
 
 export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({ queryKey: ['tasks'], queryFn: tasksApi.list });
   const [filter, setFilter] = useState<NotebookFilter>('pending');
+  const [sort, setSort] = useState<NotebookSort>('manual');
   const [query, setQuery] = useState('');
   const [newLines, setNewLines] = useState('');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -47,12 +59,16 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   const doneCount = tasks.length - pendingCount;
   const matchingTasks = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
-    return tasks.filter((task) => {
-      if (filter === 'pending' && task.status === 'done') return false;
-      if (filter === 'done' && task.status !== 'done') return false;
-      return !normalizedQuery || `${task.title} ${task.description}`.toLocaleLowerCase().includes(normalizedQuery);
-    });
-  }, [filter, query, tasks]);
+    return tasks
+      .map((task, originalIndex) => ({ task, originalIndex }))
+      .filter(({ task }) => {
+        if (filter === 'pending' && task.status === 'done') return false;
+        if (filter === 'done' && task.status !== 'done') return false;
+        return !normalizedQuery || `${task.title} ${task.description}`.toLocaleLowerCase().includes(normalizedQuery);
+      })
+      .sort((left, right) => compareTasks(left, right, sort))
+      .map(({ task }) => task);
+  }, [filter, query, sort, tasks]);
 
   const addMutation = useMutation({
     mutationFn: async (titles: string[]) => {
@@ -215,12 +231,20 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
                 </button>
               ))}
             </nav>
-            <label className={styles.searchBox}>
-              <Search size={16} aria-hidden="true" />
-              <span className={styles.srOnly}>タスクを検索</span>
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="検索" />
-              {query && <button type="button" aria-label="検索をクリア" onClick={() => setQuery('')}><X size={15} /></button>}
-            </label>
+            <div className={styles.toolbarTools}>
+              <label className={styles.sortBox}>
+                <span>並び順</span>
+                <select value={sort} onChange={(event) => setSort(event.target.value as NotebookSort)}>
+                  {(Object.keys(sortLabels) as NotebookSort[]).map((key) => <option key={key} value={key}>{sortLabels[key]}</option>)}
+                </select>
+              </label>
+              <label className={styles.searchBox}>
+                <Search size={16} aria-hidden="true" />
+                <span className={styles.srOnly}>タスクを検索</span>
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="検索" />
+                {query && <button type="button" aria-label="検索をクリア" onClick={() => setQuery('')}><X size={15} /></button>}
+              </label>
+            </div>
           </div>
 
           {operationError && <p className={styles.errorMessage} role="alert">{operationError}</p>}
@@ -300,6 +324,23 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   );
 }
 
+function compareTasks(
+  left: { task: Task; originalIndex: number },
+  right: { task: Task; originalIndex: number },
+  sort: NotebookSort,
+): number {
+  let order = 0;
+  if (sort === 'created-desc') order = right.task.createdAt - left.task.createdAt;
+  if (sort === 'title-asc') order = left.task.title.localeCompare(right.task.title, 'ja');
+  if (sort === 'due-asc') {
+    if (!left.task.dueDate && right.task.dueDate) order = 1;
+    else if (left.task.dueDate && !right.task.dueDate) order = -1;
+    else if (left.task.dueDate && right.task.dueDate) order = left.task.dueDate.localeCompare(right.task.dueDate);
+  }
+  if (sort === 'priority-desc') order = priorityRank[left.task.priority] - priorityRank[right.task.priority];
+  return order || left.originalIndex - right.originalIndex;
+}
+
 function TaskLine({
   task,
   today,
@@ -318,6 +359,8 @@ function TaskLine({
   busy: boolean;
 }): JSX.Element {
   const [title, setTitle] = useState(task.title);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const detailsId = `task-details-${task.id}`;
 
   useEffect(() => setTitle(task.title), [task.id, task.title]);
 
@@ -365,15 +408,35 @@ function TaskLine({
         />
         {hasDetails && (
           <span className={styles.taskMeta}>
-            {task.dueDate && <span>{formatDueDate(task.dueDate, today)}</span>}
+            {task.dueDate && <span>期限: {formatDueDate(task.dueDate, today)}</span>}
             {task.priority !== 'medium' && <span>{priorityLabels[task.priority]}</span>}
             {task.status === 'in_progress' && <span>{statusLabels.in_progress}</span>}
           </span>
         )}
       </div>
       <div className={styles.taskActions}>
+        <button
+          className={detailsOpen ? styles.accordionButtonOpen : styles.accordionButton}
+          type="button"
+          title={detailsOpen ? '詳細を閉じる' : '詳細を開く'}
+          aria-label={`${task.title}の詳細を${detailsOpen ? '閉じる' : '開く'}`}
+          aria-expanded={detailsOpen}
+          aria-controls={detailsId}
+          onClick={() => setDetailsOpen((open) => !open)}
+        >
+          <ChevronDown size={17} />
+        </button>
         <button type="button" title="詳細を編集" aria-label={`${task.title}の詳細を編集`} onClick={onEdit} disabled={busy}><Pencil size={15} /></button>
         <button type="button" title="削除" aria-label={`${task.title}を削除`} onClick={onDelete} disabled={busy}><Trash2 size={15} /></button>
+      </div>
+      <div className={styles.taskDetails} id={detailsId} hidden={!detailsOpen}>
+        <h3>詳細</h3>
+        <p className={styles.detailsDescription}>{task.description || 'メモはありません。'}</p>
+        <dl className={styles.detailsMeta}>
+          <div><dt>期限</dt><dd>{task.dueDate ? formatDueDate(task.dueDate, today) : 'なし'}</dd></div>
+          <div><dt>優先度</dt><dd>{priorityLabels[task.priority]}</dd></div>
+          <div><dt>ステータス</dt><dd>{statusLabels[task.status]}</dd></div>
+        </dl>
       </div>
     </article>
   );
