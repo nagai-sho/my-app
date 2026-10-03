@@ -29,6 +29,7 @@ interface TaskRow {
   due_date: string | null;
   status: TaskStatus;
   priority: TaskPriority;
+  sort_order: number;
   created_at: number;
   updated_at: number;
   completed_at: number | null;
@@ -86,16 +87,11 @@ export async function handleTasks(
 
 async function listTasks(env: AppEnv, ownerId: string): Promise<Response> {
   const result = await env.DB.prepare(
-    `SELECT id, owner_id, title, description, due_date, status, priority,
+    `SELECT id, owner_id, title, description, due_date, status, priority, sort_order,
             created_at, updated_at, completed_at
        FROM task_items
       WHERE owner_id = ?
-      ORDER BY
-        CASE WHEN status = 'done' THEN 1 ELSE 0 END ASC,
-        CASE WHEN due_date IS NULL OR due_date = '' THEN 1 ELSE 0 END ASC,
-        due_date ASC,
-        CASE priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END ASC,
-        updated_at DESC`,
+      ORDER BY sort_order ASC, created_at ASC, id ASC`,
   ).bind(ownerId).all<TaskRow>();
 
   return tasksJsonResponse({ tasks: (result.results ?? []).map(serializeTask) });
@@ -110,8 +106,10 @@ async function createTask(request: Request, env: AppEnv, ownerId: string): Promi
 
   await env.DB.prepare(
     `INSERT INTO task_items
-      (id, owner_id, title, description, due_date, status, priority, created_at, updated_at, completed_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, owner_id, title, description, due_date, status, priority, sort_order, created_at, updated_at, completed_at)
+     SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), 0) + 1, ?, ?, ?
+       FROM task_items
+      WHERE owner_id = ?`,
   ).bind(
     id,
     ownerId,
@@ -123,6 +121,7 @@ async function createTask(request: Request, env: AppEnv, ownerId: string): Promi
     now,
     now,
     completedAt,
+    ownerId,
   ).run();
 
   const task = await taskById(env, ownerId, id);
@@ -177,7 +176,7 @@ async function deleteTask(env: AppEnv, ownerId: string, taskId: string): Promise
 
 async function taskById(env: AppEnv, ownerId: string, taskId: string): Promise<TaskRow | null> {
   return env.DB.prepare(
-    `SELECT id, owner_id, title, description, due_date, status, priority,
+    `SELECT id, owner_id, title, description, due_date, status, priority, sort_order,
             created_at, updated_at, completed_at
        FROM task_items
       WHERE id = ? AND owner_id = ?
