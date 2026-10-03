@@ -51,8 +51,7 @@
 }
 
 .kicker,
-.eyebrow,
-.modalKicker {
+.eyebrow {
   margin: 0;
   color: var(--blue);
   font-size: .64rem;
@@ -61,8 +60,7 @@
 }
 
 .homeButton,
-.headerButton,
-.closeButton {
+.headerButton {
   width: 42px;
   height: 42px;
   display: inline-grid;
@@ -77,19 +75,15 @@
 }
 
 .homeButton:hover,
-.headerButton:hover,
-.closeButton:hover { border-color: #c9d0e6; background: #f8f9fd; }
+.headerButton:hover { border-color: #c9d0e6; background: #f8f9fd; }
 
 .homeButton:active,
 .headerButton:active,
-.primaryButton:active,
 .secondaryButton:active { transform: translateY(1px); }
 
 .headerButton:disabled,
-.closeButton:disabled,
-.primaryButton:disabled,
 .secondaryButton:disabled,
-.addButton:disabled,
+.saveButton:disabled,
 .taskActions button:disabled,
 .checkButton:disabled,
 .checkButtonDone:disabled { cursor: default; opacity: .52; }
@@ -316,7 +310,7 @@
 .filterButton:focus-visible,
 .filterActive:focus-visible,
 .taskActions button:focus-visible,
-.addButton:focus-visible,
+.saveButton:focus-visible,
 .headerButton:focus-visible,
 .homeButton:focus-visible {
   outline: 3px solid rgb(83 103 217 / 28%);
@@ -382,13 +376,6 @@
 }
 
 .taskDetails[hidden] { display: none; }
-.taskDetails h3 { margin: 0 0 .3rem; color: #5e6bb4; font-size: .72rem; font-weight: 850; }
-.detailsDescription { margin: 0; color: #59637b; font-size: .78rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
-
-.detailsMeta { display: flex; flex-wrap: wrap; gap: .4rem 1.15rem; margin: .55rem 0 0; }
-.detailsMeta div { display: flex; align-items: baseline; gap: .35rem; }
-.detailsMeta dt { color: #929bad; font-size: .65rem; }
-.detailsMeta dd { margin: 0; color: #58627a; font-size: .68rem; font-weight: 750; }
 
 .emptyLine {
   position: relative;
@@ -416,12 +403,20 @@
   border-top: 1px dashed #dce2eb;
 }
 
-.composerMark {
+.composerCheck {
   width: 42px;
   height: 44px;
   display: grid;
   place-items: center;
-  color: #8895d8;
+}
+
+.composerCheck::before {
+  width: 19px;
+  height: 19px;
+  border: 1.7px solid #c6cedd;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 78%);
+  content: '';
 }
 
 .composer textarea {
@@ -442,25 +437,47 @@
 .composer textarea::placeholder { color: #a8afbd; }
 .composer textarea:focus { box-shadow: inset 0 -2px #aab5ed; }
 
-.addButton {
-  min-height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .35rem;
-  padding: .45rem .8rem;
+.saveButton {
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
   border: 1px solid #d6ddf8;
   border-radius: 9px;
   color: var(--blue-dark);
   background: #eff1ff;
-  font-size: .76rem;
-  font-weight: 800;
   cursor: pointer;
   transition: background-color 150ms ease;
 }
 
-.addButton:hover:not(:disabled) { background: #e3e8ff; }
+.saveButton:hover:not(:disabled) { background: #e3e8ff; }
 .composerHint { grid-column: 2 / -1; margin-top: -.35rem; color: #a1a8b6; font-size: .64rem; }
+
+.taskDetails h3 { margin: 0 0 .55rem; color: #5e6bb4; font-size: .72rem; font-weight: 850; }
+
+.detailsField { min-width: 0; display: grid; gap: .3rem; color: #778198; font-size: .68rem; font-weight: 750; }
+
+.detailsField input,
+.detailsField select,
+.detailsField textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: .5rem .6rem;
+  border: 1px solid #dfe4ef;
+  border-radius: 8px;
+  outline: 0;
+  color: #414b64;
+  background: rgb(255 255 255 / 88%);
+  font-size: .75rem;
+}
+
+.detailsField textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
+.detailsField input:focus, .detailsField select:focus, .detailsField textarea:focus { border-color: #aab5ed; box-shadow: 0 0 0 3px rgb(83 103 217 / 10%); }
+.detailsField :disabled { color: #9da5b4; background: #f4f5f8; }
+
+.detailsGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-top: .55rem; }
 
 .footerNote {
   display: flex;
@@ -515,7 +532,6 @@
 .skeletonLine span { width: 19px; height: 19px; border-radius: 5px; background: #edf0f7; }
 .skeletonLine i { width: 52%; height: 11px; border-radius: 6px; background: #f0f2f7; }
 
-.primaryButton,
 .secondaryButton {
   min-height: 42px;
   display: inline-flex;
@@ -528,62 +544,7 @@
   cursor: pointer;
 }
 
-.primaryButton { border: 1px solid var(--blue); color: #fff; background: var(--blue); }
 .secondaryButton { border: 1px solid #dce1ed; color: #4f5972; background: #fff; }
-
-.modalBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgb(30 38 65 / 32%);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  width: min(520px, 100%);
-  max-height: min(700px, calc(100vh - 2rem));
-  overflow: auto;
-  padding: 1.3rem;
-  border: 1px solid #e0e4ef;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 24px 70px rgb(28 39 79 / 22%);
-}
-
-.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.1rem; }
-.modalHeader h2 { margin: .2rem 0 0; color: #2b3552; font-size: 1.3rem; letter-spacing: -.04em; }
-.modalKicker { color: #9aa3b7; }
-.closeButton { width: 36px; height: 36px; border-radius: 10px; }
-
-.editorForm { display: grid; gap: .85rem; }
-
-.editorForm label { display: grid; gap: .4rem; color: #66718a; font-size: .76rem; font-weight: 800; }
-
-.editorForm input,
-.editorForm select,
-.editorForm textarea {
-  width: 100%;
-  min-width: 0;
-  min-height: 44px;
-  padding: .6rem .7rem;
-  border: 1px solid #dfe4ef;
-  border-radius: 10px;
-  outline: none;
-  color: var(--ink);
-  background: #fff;
-  font-size: .88rem;
-}
-
-.editorForm textarea { min-height: 44px; overflow: hidden; resize: none; }
-.editorForm input:focus, .editorForm select:focus, .editorForm textarea:focus { border-color: #93a3ee; box-shadow: 0 0 0 3px rgb(83 103 217 / 12%); }
-.optional { color: #a4acbd; font-size: .67rem; font-weight: 600; }
-.editorGrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
-.validationError { margin: -.15rem 0 0; color: #bd4e58; font-size: .76rem; }
-
-.modalActions { display: flex; justify-content: flex-end; gap: .55rem; margin-top: .35rem; padding-top: 1rem; border-top: 1px solid #edf0f5; }
 
 .srOnly {
   position: absolute;
@@ -621,13 +582,10 @@
   .taskDetails { margin-right: .1rem; padding: .65rem .7rem; }
   .taskTitle, .taskTitleDone { font-size: .84rem; }
   .composer { grid-template-columns: 40px minmax(0, 1fr) auto; gap: .3rem; padding-left: .1rem; }
-  .composerMark { width: 38px; }
-  .addButton { padding-inline: .55rem; }
+  .composerCheck { width: 38px; }
+  .saveButton { width: 40px; height: 40px; }
   .composerHint { font-size: .61rem; }
-  .editorGrid { grid-template-columns: 1fr; }
-  .modal { padding: 1rem; border-radius: 17px; }
-  .modalActions { display: grid; grid-template-columns: 1fr 1fr; }
-  .modalActions button { width: 100%; }
+  .detailsGrid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 370px) {

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Check, CheckCircle2, ChevronDown, House, LogOut, Pencil, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, Check, CheckCircle2, ChevronDown, House, LogOut, Pencil, RefreshCw, Search, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { tasksApi, todayJst, type Task, type TaskInput, type TaskPriority, type TaskStatus } from './apiClient';
@@ -12,6 +12,11 @@ interface TasksAppProps {
 
 type NotebookFilter = 'pending' | 'done' | 'all';
 type NotebookSort = 'manual' | 'created-desc' | 'title-asc' | 'due-asc' | 'priority-desc';
+
+interface TaskUpsertRequest {
+  id?: string;
+  input: TaskInput;
+}
 
 const filterLabels: Record<NotebookFilter, string> = {
   pending: '未完了',
@@ -50,7 +55,6 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   const [sort, setSort] = useState<NotebookSort>('manual');
   const [query, setQuery] = useState('');
   const [newLines, setNewLines] = useState('');
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [operationError, setOperationError] = useState<string | null>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const today = useMemo(() => todayJst(), []);
@@ -70,37 +74,31 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
       .map(({ task }) => task);
   }, [filter, query, sort, tasks]);
 
-  const addMutation = useMutation({
-    mutationFn: async (titles: string[]) => {
-      const failedTitles: string[] = [];
-      // Create in sequence so the stored notebook order follows the entered lines.
-      for (const title of titles) {
+  const upsertMutation = useMutation({
+    mutationFn: async (requests: TaskUpsertRequest[]) => {
+      const failedRequests: TaskUpsertRequest[] = [];
+      // Process in order so new rows keep the order in which they were entered.
+      for (const request of requests) {
         try {
-          await tasksApi.create({ title, description: '', dueDate: null, priority: 'medium', status: 'todo' });
+          if (request.id) await tasksApi.update(request.id, request.input);
+          else await tasksApi.create(request.input);
         } catch {
-          failedTitles.push(title);
+          failedRequests.push(request);
         }
       }
-      return { failedTitles, attemptedCount: titles.length };
+      return { failedRequests, succeededCount: requests.length - failedRequests.length };
     },
-    onSuccess: async ({ failedTitles, attemptedCount }) => {
-      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      setNewLines(failedTitles.join('\n'));
-      setOperationError(failedTitles.length > 0
-        ? `${failedTitles.length}/${attemptedCount}行を追加できませんでした。残った行を確認してください。`
-        : null);
+    onSuccess: async ({ failedRequests, succeededCount }, requests) => {
+      if (succeededCount > 0) await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      const hasNewRows = requests.some((request) => !request.id);
+      if (hasNewRows) setNewLines(failedRequests.filter((request) => !request.id).map((request) => request.input.title).join('\n'));
+      setOperationError(failedRequests.length === 0
+        ? null
+        : hasNewRows
+          ? `${failedRequests.length}/${requests.length}行を追加できませんでした。残った行を確認してください。`
+          : 'タスクを保存できませんでした。入力内容と通信状態を確認してください。');
     },
-    onError: (error: unknown) => setOperationError(getErrorMessage(error, 'タスクの追加に失敗しました。')),
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: TaskInput }) => tasksApi.update(id, input),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      setEditingTask(null);
-      setOperationError(null);
-    },
-    onError: (error: unknown) => setOperationError(getErrorMessage(error, 'タスクの保存に失敗しました。')),
+    onError: (error: unknown) => setOperationError(getErrorMessage(error, 'タスクを保存できませんでした。')),
   });
 
   const toggleMutation = useMutation({
@@ -130,7 +128,7 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
 
   function addLines(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    if (addMutation.isPending) return;
+    if (upsertMutation.isPending) return;
 
     const titles = newLines.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
     if (titles.length === 0) return;
@@ -139,7 +137,9 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
       return;
     }
     setOperationError(null);
-    addMutation.mutate(titles);
+    upsertMutation.mutate(titles.map((title) => ({
+      input: { title, description: '', dueDate: null, priority: 'medium', status: 'todo' },
+    })));
   }
 
   function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>): void {
@@ -149,15 +149,10 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
     }
   }
 
-  function saveTitle(task: Task, title: string): void {
-    const normalizedTitle = title.trim();
-    if (!normalizedTitle || normalizedTitle === task.title || saveMutation.isPending) return;
-    saveMutation.mutate({ id: task.id, input: { title: normalizedTitle } });
-  }
-
-  function openDetails(task: Task): void {
+  function saveTask(task: Task, input: TaskInput): void {
+    if (upsertMutation.isPending) return;
     setOperationError(null);
-    setEditingTask(task);
+    upsertMutation.mutate([{ id: task.id, input }]);
   }
 
   function toggleTask(task: Task): void {
@@ -267,10 +262,9 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
                       task={task}
                       today={today}
                       onToggle={() => toggleTask(task)}
-                      onSaveTitle={(title) => saveTitle(task, title)}
-                      onEdit={() => openDetails(task)}
+                      onSave={(input) => saveTask(task, input)}
                       onDelete={() => deleteTask(task)}
-                      busy={toggleMutation.isPending || removeMutation.isPending}
+                      busy={toggleMutation.isPending || removeMutation.isPending || upsertMutation.isPending}
                     />
                   ))}
                 </div>
@@ -282,7 +276,7 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
               )}
 
               <form className={styles.composer} onSubmit={addLines}>
-                <span className={styles.composerMark} aria-hidden="true"><Plus size={18} /></span>
+                <span className={styles.composerCheck} aria-hidden="true" />
                 <label className={styles.srOnly} htmlFor="new-task-lines">新しいタスク。1行につき1件入力</label>
                 <textarea
                   id="new-task-lines"
@@ -293,12 +287,12 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
                   placeholder="ここに入力（1行につき1タスク）"
                   rows={1}
                   maxLength={10_000}
-                  disabled={addMutation.isPending}
+                  disabled={upsertMutation.isPending}
                 />
-                <button className={styles.addButton} type="submit" disabled={!newLines.trim() || addMutation.isPending}>
-                  <Plus size={16} />{addMutation.isPending ? '追加中…' : '追加'}
+                <button className={styles.saveButton} type="submit" title="入力した行を追加" aria-label="入力した行を追加" disabled={!newLines.trim() || upsertMutation.isPending}>
+                  <Pencil size={17} />
                 </button>
-                <span className={styles.composerHint}>複数行もまとめて追加できます</span>
+                <span className={styles.composerHint}>{upsertMutation.isPending ? '保存中…' : '鉛筆を押すと、1行ずつタスクとして追加されます'}</span>
               </form>
             </div>
           )}
@@ -312,14 +306,6 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
         )}
       </main>
 
-      {editingTask && (
-        <TaskEditorModal
-          task={editingTask}
-          isSaving={saveMutation.isPending}
-          onClose={() => { if (!saveMutation.isPending) setEditingTask(null); }}
-          onSubmit={(input) => saveMutation.mutate({ id: editingTask.id, input })}
-        />
-      )}
     </div>
   );
 }
@@ -345,44 +331,46 @@ function TaskLine({
   task,
   today,
   onToggle,
-  onSaveTitle,
-  onEdit,
+  onSave,
   onDelete,
   busy,
 }: {
   task: Task;
   today: string;
   onToggle: () => void;
-  onSaveTitle: (title: string) => void;
-  onEdit: () => void;
+  onSave: (input: TaskInput) => void;
   onDelete: () => void;
   busy: boolean;
 }): JSX.Element {
-  const [title, setTitle] = useState(task.title);
+  const [draft, setDraft] = useState<TaskDraft>(() => toTaskDraft(task));
   const [detailsOpen, setDetailsOpen] = useState(false);
   const detailsId = `task-details-${task.id}`;
 
-  useEffect(() => setTitle(task.title), [task.id, task.title]);
-
-  function commitTitle(): void {
-    if (!title.trim()) {
-      setTitle(task.title);
-      return;
-    }
-    onSaveTitle(title);
-  }
+  useEffect(() => setDraft(toTaskDraft(task)), [task.id, task.title, task.description, task.dueDate, task.priority, task.status]);
 
   function handleTitleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      event.currentTarget.blur();
-    } else if (event.key === 'Escape') {
-      setTitle(task.title);
-      event.currentTarget.blur();
-    }
+    if (event.key === 'Enter') event.preventDefault();
+    if (event.key === 'Escape') setDraft((current) => ({ ...current, title: task.title }));
   }
 
+  const hasChanges = draft.title.trim() !== task.title
+    || draft.description.trim() !== task.description
+    || (draft.dueDate || null) !== task.dueDate
+    || draft.priority !== task.priority
+    || draft.status !== task.status;
   const hasDetails = Boolean(task.dueDate) || task.priority !== 'medium' || task.status === 'in_progress';
+
+  function save(): void {
+    if (!draft.title.trim()) return;
+    if (!hasChanges || busy) return;
+    onSave({
+      title: draft.title.trim(),
+      description: draft.description.trim(),
+      dueDate: draft.dueDate || null,
+      priority: draft.priority,
+      status: draft.status,
+    });
+  }
 
   return (
     <article className={task.status === 'done' ? styles.taskLineDone : styles.taskLine}>
@@ -392,7 +380,8 @@ function TaskLine({
         aria-label={task.status === 'done' ? `${task.title}を未完了に戻す` : `${task.title}を完了にする`}
         aria-pressed={task.status === 'done'}
         onClick={onToggle}
-        disabled={busy}
+        title={hasChanges ? '編集内容を保存してからチェックできます' : undefined}
+        disabled={busy || hasChanges}
       >
         {task.status === 'done' && <Check size={17} strokeWidth={3} />}
       </button>
@@ -400,11 +389,11 @@ function TaskLine({
         <input
           className={task.status === 'done' ? styles.taskTitleDone : styles.taskTitle}
           aria-label={`${task.title}を編集`}
-          value={title}
+          value={draft.title}
           maxLength={200}
-          onChange={(event) => setTitle(event.target.value)}
-          onBlur={commitTitle}
+          onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
           onKeyDown={handleTitleKeyDown}
+          disabled={busy}
         />
         {hasDetails && (
           <span className={styles.taskMeta}>
@@ -426,17 +415,57 @@ function TaskLine({
         >
           <ChevronDown size={17} />
         </button>
-        <button type="button" title="詳細を編集" aria-label={`${task.title}の詳細を編集`} onClick={onEdit} disabled={busy}><Pencil size={15} /></button>
+        <button
+          type="button"
+          title="変更を保存"
+          aria-label={`${task.title}の変更を保存`}
+          onClick={save}
+          disabled={!hasChanges || busy || !draft.title.trim()}
+        >
+          <Pencil size={15} />
+        </button>
         <button type="button" title="削除" aria-label={`${task.title}を削除`} onClick={onDelete} disabled={busy}><Trash2 size={15} /></button>
       </div>
       <div className={styles.taskDetails} id={detailsId} hidden={!detailsOpen}>
         <h3>詳細</h3>
-        <p className={styles.detailsDescription}>{task.description || 'メモはありません。'}</p>
-        <dl className={styles.detailsMeta}>
-          <div><dt>期限</dt><dd>{task.dueDate ? formatDueDate(task.dueDate, today) : 'なし'}</dd></div>
-          <div><dt>優先度</dt><dd>{priorityLabels[task.priority]}</dd></div>
-          <div><dt>ステータス</dt><dd>{statusLabels[task.status]}</dd></div>
-        </dl>
+        <label className={styles.detailsField}>
+          メモ
+          <textarea
+            value={draft.description}
+            maxLength={2_000}
+            rows={3}
+            placeholder="補足や手順"
+            onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
+            disabled={busy}
+          />
+        </label>
+        <div className={styles.detailsGrid}>
+          <label className={styles.detailsField}>
+            期限
+            <input
+              type="date"
+              value={draft.dueDate}
+              onChange={(event) => setDraft((current) => ({ ...current, dueDate: event.target.value }))}
+              disabled={busy}
+            />
+          </label>
+          <label className={styles.detailsField}>
+            優先度
+            <select value={draft.priority} onChange={(event) => setDraft((current) => ({ ...current, priority: event.target.value as TaskPriority }))} disabled={busy}>
+              <option value="high">高優先</option>
+              <option value="medium">中優先</option>
+              <option value="low">低優先</option>
+            </select>
+          </label>
+          <label className={styles.detailsField}>
+            ステータス
+            <select value={draft.status} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value as TaskStatus }))} disabled={busy}>
+              <option value="todo">{statusLabels.todo}</option>
+              <option value="in_progress">{statusLabels.in_progress}</option>
+              <option value="done">{statusLabels.done}</option>
+            </select>
+          </label>
+        </div>
       </div>
     </article>
   );
@@ -463,102 +492,7 @@ interface TaskDraft {
   status: TaskStatus;
 }
 
-function TaskEditorModal({ task, isSaving, onClose, onSubmit }: { task: Task; isSaving: boolean; onClose: () => void; onSubmit: (input: TaskInput) => void }): JSX.Element {
-  const [draft, setDraft] = useState<TaskDraft>(() => toDraft(task));
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    setDraft(toDraft(task));
-    setValidationError(null);
-    titleRef.current?.focus();
-  }, [task]);
-
-  useEffect(() => {
-    function handleKeyDown(event: globalThis.KeyboardEvent): void {
-      if (event.key === 'Escape' && !isSaving) onClose();
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isSaving, onClose]);
-
-  useLayoutEffect(() => {
-    const textarea = descriptionRef.current;
-    if (!textarea) return;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [draft.description]);
-
-  function submit(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    if (!draft.title.trim()) {
-      setValidationError('タスク名を入力してください。');
-      titleRef.current?.focus();
-      return;
-    }
-    onSubmit({
-      title: draft.title.trim(),
-      description: draft.description.trim(),
-      dueDate: draft.dueDate || null,
-      priority: draft.priority,
-      status: draft.status,
-    });
-  }
-
-  return (
-    <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="task-editor-title">
-        <div className={styles.modalHeader}>
-          <div>
-            <p className={styles.modalKicker}>TASK DETAILS</p>
-            <h2 id="task-editor-title">タスクの詳細</h2>
-          </div>
-          <button className={styles.closeButton} type="button" aria-label="閉じる" onClick={onClose} disabled={isSaving}><X size={19} /></button>
-        </div>
-        <form className={styles.editorForm} onSubmit={submit}>
-          <label>
-            タスク名
-            <input ref={titleRef} value={draft.title} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} maxLength={200} />
-          </label>
-          <label>
-            メモ <span className={styles.optional}>任意</span>
-            <textarea ref={descriptionRef} value={draft.description} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} maxLength={2_000} placeholder="補足や手順" rows={1} />
-          </label>
-          <div className={styles.editorGrid}>
-            <label>
-              期限 <span className={styles.optional}>任意</span>
-              <input type="date" value={draft.dueDate} onChange={(event) => setDraft((current) => ({ ...current, dueDate: event.target.value }))} />
-            </label>
-            <label>
-              優先度
-              <select value={draft.priority} onChange={(event) => setDraft((current) => ({ ...current, priority: event.target.value as TaskPriority }))}>
-                <option value="high">高優先</option>
-                <option value="medium">中優先</option>
-                <option value="low">低優先</option>
-              </select>
-            </label>
-          </div>
-          <label>
-            ステータス
-            <select value={draft.status} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value as TaskStatus }))}>
-              <option value="todo">{statusLabels.todo}</option>
-              <option value="in_progress">{statusLabels.in_progress}</option>
-              <option value="done">{statusLabels.done}</option>
-            </select>
-          </label>
-          {validationError && <p className={styles.validationError} role="alert">{validationError}</p>}
-          <div className={styles.modalActions}>
-            <button className={styles.secondaryButton} type="button" onClick={onClose} disabled={isSaving}>キャンセル</button>
-            <button className={styles.primaryButton} type="submit" disabled={isSaving}>{isSaving ? '保存中…' : '保存する'}</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function toDraft(task: Task): TaskDraft {
+function toTaskDraft(task: Task): TaskDraft {
   return {
     title: task.title,
     description: task.description,
