@@ -9,6 +9,7 @@ function task(overrides: Partial<Task>): Task {
   return {
     id: 'task',
     title: 'タスク',
+    category: '未分類',
     description: '',
     dueDate: null,
     status: 'todo',

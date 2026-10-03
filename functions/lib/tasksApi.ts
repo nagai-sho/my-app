@@ -7,10 +7,12 @@ const API_PREFIX = '/api/v1/tasks';
 const OWNER_ID = 'owner';
 const STATUSES = ['todo', 'in_progress', 'done'] as const;
 const PRIORITIES = ['low', 'medium', 'high'] as const;
+const DEFAULT_CATEGORY = '未分類';
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '期限はYYYY-MM-DD形式で指定してください。');
 
 const taskCreateSchema = z.object({
   title: z.string().trim().min(1, 'タスク名を入力してください。').max(200),
+  category: z.string().trim().min(1, 'カテゴリを入力してください。').max(40).default(DEFAULT_CATEGORY),
   description: z.string().trim().max(2_000).default(''),
   dueDate: z.union([dateSchema, z.literal(''), z.null()]).default(null),
   priority: z.enum(PRIORITIES).default('medium'),
@@ -25,6 +27,7 @@ interface TaskRow {
   id: string;
   owner_id: string;
   title: string;
+  category: string;
   description: string;
   due_date: string | null;
   status: TaskStatus;
@@ -87,7 +90,7 @@ export async function handleTasks(
 
 async function listTasks(env: AppEnv, ownerId: string): Promise<Response> {
   const result = await env.DB.prepare(
-    `SELECT id, owner_id, title, description, due_date, status, priority, sort_order,
+    `SELECT id, owner_id, title, category, description, due_date, status, priority, sort_order,
             created_at, updated_at, completed_at
        FROM task_items
       WHERE owner_id = ?
@@ -106,14 +109,15 @@ async function createTask(request: Request, env: AppEnv, ownerId: string): Promi
 
   await env.DB.prepare(
     `INSERT INTO task_items
-      (id, owner_id, title, description, due_date, status, priority, sort_order, created_at, updated_at, completed_at)
-     SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), 0) + 1, ?, ?, ?
+      (id, owner_id, title, category, description, due_date, status, priority, sort_order, created_at, updated_at, completed_at)
+     SELECT ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), 0) + 1, ?, ?, ?
        FROM task_items
       WHERE owner_id = ?`,
   ).bind(
     id,
     ownerId,
     body.title,
+    body.category,
     body.description,
     dueDate,
     body.status,
@@ -145,11 +149,12 @@ async function patchTask(
 
   await env.DB.prepare(
     `UPDATE task_items
-        SET title = ?, description = ?, due_date = ?, status = ?, priority = ?,
+        SET title = ?, category = ?, description = ?, due_date = ?, status = ?, priority = ?,
             updated_at = ?, completed_at = ?
       WHERE id = ? AND owner_id = ?`,
   ).bind(
     body.title ?? current.title,
+    body.category ?? current.category,
     body.description ?? current.description,
     body.dueDate === undefined ? current.due_date : body.dueDate || null,
     nextStatus,
@@ -176,7 +181,7 @@ async function deleteTask(env: AppEnv, ownerId: string, taskId: string): Promise
 
 async function taskById(env: AppEnv, ownerId: string, taskId: string): Promise<TaskRow | null> {
   return env.DB.prepare(
-    `SELECT id, owner_id, title, description, due_date, status, priority, sort_order,
+    `SELECT id, owner_id, title, category, description, due_date, status, priority, sort_order,
             created_at, updated_at, completed_at
        FROM task_items
       WHERE id = ? AND owner_id = ?
@@ -188,6 +193,7 @@ function serializeTask(row: TaskRow) {
   return {
     id: row.id,
     title: row.title,
+    category: row.category || DEFAULT_CATEGORY,
     description: row.description || '',
     dueDate: row.due_date,
     status: row.status,

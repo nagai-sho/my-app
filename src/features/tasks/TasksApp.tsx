@@ -45,6 +45,7 @@ const sortLabels: Record<NotebookSort, string> = {
 };
 
 const priorityRank: Record<TaskPriority, number> = { high: 0, medium: 1, low: 2 };
+const DEFAULT_TASK_CATEGORY = '未分類';
 
 const EMPTY_TASKS: Task[] = [];
 
@@ -53,12 +54,20 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   const tasksQuery = useQuery({ queryKey: ['tasks'], queryFn: tasksApi.list });
   const [filter, setFilter] = useState<NotebookFilter>('pending');
   const [sort, setSort] = useState<NotebookSort>('manual');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [query, setQuery] = useState('');
   const [newLines, setNewLines] = useState('');
   const [operationError, setOperationError] = useState<string | null>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const today = useMemo(() => todayJst(), []);
   const tasks = tasksQuery.data?.tasks ?? EMPTY_TASKS;
+  const categories = useMemo(
+    () => [...new Set(tasks.map((task) => task.category.trim() || DEFAULT_TASK_CATEGORY))].sort((left, right) => left.localeCompare(right, 'ja')),
+    [tasks],
+  );
+  useEffect(() => {
+    if (categoryFilter && !categories.includes(categoryFilter)) setCategoryFilter('');
+  }, [categories, categoryFilter]);
   const pendingCount = tasks.filter((task) => task.status !== 'done').length;
   const doneCount = tasks.length - pendingCount;
   const matchingTasks = useMemo(() => {
@@ -68,11 +77,12 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
       .filter(({ task }) => {
         if (filter === 'pending' && task.status === 'done') return false;
         if (filter === 'done' && task.status !== 'done') return false;
-        return !normalizedQuery || `${task.title} ${task.description}`.toLocaleLowerCase().includes(normalizedQuery);
+        if (categoryFilter && (task.category || DEFAULT_TASK_CATEGORY) !== categoryFilter) return false;
+        return !normalizedQuery || `${task.title} ${task.category} ${task.description}`.toLocaleLowerCase().includes(normalizedQuery);
       })
       .sort((left, right) => compareTasks(left, right, sort))
       .map(({ task }) => task);
-  }, [filter, query, sort, tasks]);
+  }, [categoryFilter, filter, query, sort, tasks]);
 
   const upsertMutation = useMutation({
     mutationFn: async (requests: TaskUpsertRequest[]) => {
@@ -138,7 +148,7 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
     }
     setOperationError(null);
     upsertMutation.mutate(titles.map((title) => ({
-      input: { title, description: '', dueDate: null, priority: 'medium', status: 'todo' },
+      input: { title, category: DEFAULT_TASK_CATEGORY, description: '', dueDate: null, priority: 'medium', status: 'todo' },
     })));
   }
 
@@ -227,6 +237,13 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
               ))}
             </nav>
             <div className={styles.toolbarTools}>
+              <label className={styles.categoryBox}>
+                <span>カテゴリ</span>
+                <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+                  <option value="">全カテゴリ</option>
+                  {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                </select>
+              </label>
               <label className={styles.sortBox}>
                 <span>並び順</span>
                 <select value={sort} onChange={(event) => setSort(event.target.value as NotebookSort)}>
@@ -354,17 +371,19 @@ function TaskLine({
   }
 
   const hasChanges = draft.title.trim() !== task.title
+    || (draft.category.trim() || DEFAULT_TASK_CATEGORY) !== task.category
     || draft.description.trim() !== task.description
     || (draft.dueDate || null) !== task.dueDate
     || draft.priority !== task.priority
     || draft.status !== task.status;
-  const hasDetails = Boolean(task.dueDate) || task.priority !== 'medium' || task.status === 'in_progress';
+  const hasDetails = task.category !== DEFAULT_TASK_CATEGORY || Boolean(task.dueDate) || task.priority !== 'medium' || task.status === 'in_progress';
 
   function save(): void {
     if (!draft.title.trim()) return;
     if (!hasChanges || busy) return;
     onSave({
       title: draft.title.trim(),
+      category: draft.category.trim() || DEFAULT_TASK_CATEGORY,
       description: draft.description.trim(),
       dueDate: draft.dueDate || null,
       priority: draft.priority,
@@ -397,6 +416,7 @@ function TaskLine({
         />
         {hasDetails && (
           <span className={styles.taskMeta}>
+            {task.category !== DEFAULT_TASK_CATEGORY && <span>カテゴリ: {task.category}</span>}
             {task.dueDate && <span>期限: {formatDueDate(task.dueDate, today)}</span>}
             {task.priority !== 'medium' && <span>{priorityLabels[task.priority]}</span>}
             {task.status === 'in_progress' && <span>{statusLabels.in_progress}</span>}
@@ -428,18 +448,18 @@ function TaskLine({
       </div>
       <div className={styles.taskDetails} id={detailsId} hidden={!detailsOpen}>
         <h3>詳細</h3>
-        <label className={styles.detailsField}>
-          メモ
-          <textarea
-            value={draft.description}
-            maxLength={2_000}
-            rows={3}
-            placeholder="補足や手順"
-            onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-            disabled={busy}
-          />
-        </label>
         <div className={styles.detailsGrid}>
+          <label className={styles.detailsField}>
+            カテゴリ
+            <input
+              type="text"
+              value={draft.category}
+              maxLength={40}
+              placeholder={DEFAULT_TASK_CATEGORY}
+              onChange={(event) => setDraft((current) => ({ ...current, category: event.target.value }))}
+              disabled={busy}
+            />
+          </label>
           <label className={styles.detailsField}>
             期限
             <input
@@ -466,6 +486,17 @@ function TaskLine({
             </select>
           </label>
         </div>
+        <label className={styles.detailsField}>
+          メモ
+          <textarea
+            value={draft.description}
+            maxLength={2_000}
+            rows={3}
+            placeholder="補足や手順"
+            onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
+            disabled={busy}
+          />
+        </label>
       </div>
     </article>
   );
@@ -486,6 +517,7 @@ function TaskListSkeleton(): JSX.Element {
 
 interface TaskDraft {
   title: string;
+  category: string;
   description: string;
   dueDate: string;
   priority: TaskPriority;
@@ -495,6 +527,7 @@ interface TaskDraft {
 function toTaskDraft(task: Task): TaskDraft {
   return {
     title: task.title,
+    category: task.category || DEFAULT_TASK_CATEGORY,
     description: task.description,
     dueDate: task.dueDate ?? '',
     priority: task.priority,
