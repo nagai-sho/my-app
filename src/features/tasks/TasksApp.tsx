@@ -436,6 +436,7 @@ function TaskLine({
           <ChevronDown size={17} />
         </button>
         <button
+          className={styles.taskSaveButton}
           type="button"
           title="変更を保存"
           aria-label={`${task.title}の変更を保存`}

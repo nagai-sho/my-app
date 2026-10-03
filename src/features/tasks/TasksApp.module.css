@@ -455,6 +455,21 @@
 }
 
 .saveButton:hover:not(:disabled) { background: #e3e8ff; }
+
+.saveButton:not(:disabled),
+.taskActions .taskSaveButton:not(:disabled) {
+  border-color: #efc4c8;
+  color: #cf4451;
+  background: #fff0f1;
+}
+
+.saveButton:hover:not(:disabled),
+.taskActions .taskSaveButton:hover:not(:disabled) {
+  border-color: #e8a9b0;
+  color: #a8323e;
+  background: #ffe4e7;
+}
+
 .composerHint { grid-column: 2 / -1; margin-top: -.35rem; color: #a1a8b6; font-size: .64rem; }
 
 .taskDetails h3 { margin: 0 0 .55rem; color: #5e6bb4; font-size: .72rem; font-weight: 850; }
