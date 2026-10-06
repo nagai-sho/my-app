@@ -10,7 +10,6 @@ import { useAuth } from './features/auth/useAuth';
 import { useApps } from './features/apps/useApps';
 import { CashbookApp } from './features/cashbook/CashbookApp';
 import { CollectionApp } from './features/collection/CollectionApp';
-import { ArchDraftApp } from './features/arch-draft-app/ArchDraftApp';
 import { GathererApp } from './features/gatherer/GathererApp';
 import { OperationsApp } from './features/operations/OperationsApp';
 import { TasksApp } from './features/tasks/TasksApp';
@@ -103,7 +102,6 @@ export default function App(): JSX.Element {
         path="/collection/*"
         element={<CollectionApp idToken={auth.idToken} onLogout={auth.logout} />}
       />
-      <Route path="/arch-draft-app/*" element={<ArchDraftApp onLogout={auth.logout} />} />
       <Route path="/gatherer/*" element={<GathererApp onLogout={auth.logout} />} />
       <Route path="/operations/*" element={<OperationsApp onLogout={auth.logout} />} />
       <Route path="/tasks/*" element={<TasksApp onLogout={auth.logout} />} />

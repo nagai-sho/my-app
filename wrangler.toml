@@ -13,8 +13,3 @@ database_id = "ce71b5d2-ac90-47f1-9a88-223c6ac924f2"
 binding = "COLLECTION_R2"
 # collection-appで既存データを保存しているバケットをそのまま参照する。
 bucket_name = "collection-app-image"
-
-[[r2_buckets]]
-binding = "ARCH_DRAFT_R2"
-# arch-draft-app専用のバケット。
-bucket_name = "arch-draft-app-image"
