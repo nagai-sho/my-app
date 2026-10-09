@@ -1,9 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Check, CheckCircle2, ChevronDown, House, LogOut, Pencil, RefreshCw, Search, Trash2, X } from 'lucide-react';
+import { AlertCircle, BellRing, Check, CheckCircle2, ChevronDown, House, LogOut, Pencil, RefreshCw, Search, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { tasksApi, todayJst, type Task, type TaskInput, type TaskPriority, type TaskStatus } from './apiClient';
+import { tasksApi, todayJst, type Task, type TaskInput, type TaskPriority, type TaskStatus, type TaskRestriction } from './apiClient';
+import { formatRestrictionDate } from './restrictionDates';
+import { RestrictionsPanel } from './RestrictionsPanel';
 import styles from './TasksApp.module.css';
 
 interface TasksAppProps {
@@ -11,6 +13,7 @@ interface TasksAppProps {
 }
 
 type NotebookFilter = 'pending' | 'done' | 'all';
+type TasksView = 'tasks' | 'restrictions';
 type NotebookSort = 'manual' | 'created-desc' | 'title-asc' | 'due-asc' | 'priority-desc';
 
 interface TaskUpsertRequest {
@@ -48,10 +51,13 @@ const priorityRank: Record<TaskPriority, number> = { high: 0, medium: 1, low: 2 
 const DEFAULT_TASK_CATEGORY = '未分類';
 
 const EMPTY_TASKS: Task[] = [];
+const EMPTY_RESTRICTIONS: TaskRestriction[] = [];
 
 export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({ queryKey: ['tasks'], queryFn: tasksApi.list });
+  const restrictionsQuery = useQuery({ queryKey: ['task-restrictions'], queryFn: tasksApi.listRestrictions });
+  const [view, setView] = useState<TasksView>('tasks');
   const [filter, setFilter] = useState<NotebookFilter>('pending');
   const [sort, setSort] = useState<NotebookSort>('manual');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -59,8 +65,11 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
   const [newLines, setNewLines] = useState('');
   const [operationError, setOperationError] = useState<string | null>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
-  const today = useMemo(() => todayJst(), []);
+  const [today, setToday] = useState(todayJst);
   const tasks = tasksQuery.data?.tasks ?? EMPTY_TASKS;
+  const restrictions = restrictionsQuery.data?.restrictions ?? EMPTY_RESTRICTIONS;
+  const activeRestrictionsCount = restrictions.filter((restriction) => restriction.releaseDate > today).length;
+  const releaseNotifications = restrictions.filter((restriction) => restriction.releaseDate <= today && !restriction.notificationDismissedAt);
   const categories = useMemo(
     () => [...new Set(tasks.map((task) => task.category.trim() || DEFAULT_TASK_CATEGORY))].sort((left, right) => left.localeCompare(right, 'ja')),
     [tasks],
@@ -128,6 +137,20 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
     },
     onError: (error: unknown) => setOperationError(getErrorMessage(error, 'タスクを削除できませんでした。')),
   });
+
+  const dismissRestrictionMutation = useMutation({
+    mutationFn: (restrictionId: string) => tasksApi.updateRestriction(restrictionId, { notificationDismissed: true }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['task-restrictions'] });
+      setOperationError(null);
+    },
+    onError: (error: unknown) => setOperationError(getErrorMessage(error, '解除のお知らせを閉じられませんでした。')),
+  });
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setToday(todayJst()), 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   useLayoutEffect(() => {
     const textarea = composerRef.current;
@@ -198,11 +221,14 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
               className={styles.headerButton}
               type="button"
               title="更新"
-              aria-label="タスクを更新"
-              onClick={() => void tasksQuery.refetch()}
-              disabled={tasksQuery.isFetching}
+              aria-label="Tasksを更新"
+              onClick={() => {
+                void tasksQuery.refetch();
+                void restrictionsQuery.refetch();
+              }}
+              disabled={tasksQuery.isFetching || restrictionsQuery.isFetching}
             >
-              <RefreshCw size={18} className={tasksQuery.isFetching ? styles.spinning : undefined} />
+              <RefreshCw size={18} className={tasksQuery.isFetching || restrictionsQuery.isFetching ? styles.spinning : undefined} />
             </button>
             <button className={styles.headerButton} type="button" title="ログアウト" aria-label="ログアウト" onClick={onLogout}>
               <LogOut size={18} />
@@ -214,14 +240,49 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
       <main className={styles.main}>
         <section className={styles.pageIntro}>
           <div>
-            <p className={styles.eyebrow}>ONE LINE, ONE TASK</p>
-            <h2>思いついたことを、そのまま一行に。</h2>
-            <p>一行につきタスクひとつ。チェックを入れると完了です。</p>
+            <p className={styles.eyebrow}>{view === 'tasks' ? 'ONE LINE, ONE TASK' : 'RESTRICTION TRACKER'}</p>
+            <h2>{view === 'tasks' ? '思いついたことを、そのまま一行に。' : '制限の解除日を忘れない。'}</h2>
+            <p>{view === 'tasks' ? '一行につきタスクひとつ。チェックを入れると完了です。' : '実施日と制限期間を記録すると、解除日以降にアプリ内でお知らせします。'}</p>
           </div>
           <time className={styles.today} dateTime={today}>{formatNotebookDate(today)}</time>
         </section>
 
-        <section className={styles.notebook} aria-label="タスクメモ">
+        {releaseNotifications.length > 0 && (
+          <div className={styles.notificationStack} aria-label="制限解除のお知らせ" aria-live="polite">
+            {releaseNotifications.map((restriction) => (
+              <section className={styles.notificationBanner} key={restriction.id} role="status">
+                <div className={styles.notificationIcon}><BellRing size={19} /></div>
+                <div className={styles.notificationText}>
+                  <h3>制限解除のお知らせ</h3>
+                  <p>「{restriction.name}」の制限期間が終了しました。</p>
+                  <span>解除日: {formatRestrictionDate(restriction.releaseDate)}</span>
+                </div>
+                <button
+                  type="button"
+                  className={styles.dismissNoticeButton}
+                  aria-label={`「${restriction.name}」の解除のお知らせを閉じる`}
+                  onClick={() => dismissRestrictionMutation.mutate(restriction.id)}
+                  disabled={dismissRestrictionMutation.isPending}
+                >
+                  <X size={17} />
+                </button>
+              </section>
+            ))}
+          </div>
+        )}
+
+        <nav className={styles.featureTabs} aria-label="Tasksの機能">
+          <button className={view === 'tasks' ? styles.featureTabActive : styles.featureTab} type="button" onClick={() => setView('tasks')} aria-pressed={view === 'tasks'}>
+            タスク <span>{pendingCount}</span>
+          </button>
+          <button className={view === 'restrictions' ? styles.featureTabActive : styles.featureTab} type="button" onClick={() => setView('restrictions')} aria-pressed={view === 'restrictions'}>
+            制限 <span>{activeRestrictionsCount}</span>
+          </button>
+        </nav>
+
+        {operationError && <p className={styles.errorMessage} role="alert">{operationError}</p>}
+
+        {view === 'tasks' ? <section className={styles.notebook} aria-label="タスクメモ">
           <div className={styles.notebookToolbar}>
             <nav className={styles.filterTabs} aria-label="表示するタスク">
               {(Object.keys(filterLabels) as NotebookFilter[]).map((key) => (
@@ -259,7 +320,6 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
             </div>
           </div>
 
-          {operationError && <p className={styles.errorMessage} role="alert">{operationError}</p>}
           {tasksQuery.isLoading && <TaskListSkeleton />}
           {!tasksQuery.isLoading && queryError && (
             <div className={styles.stateCard}>
@@ -313,9 +373,9 @@ export function TasksApp({ onLogout }: TasksAppProps): JSX.Element {
               </form>
             </div>
           )}
-        </section>
+        </section> : <RestrictionsPanel today={today} />}
 
-        {!tasksQuery.isLoading && !queryError && (
+        {view === 'tasks' && !tasksQuery.isLoading && !queryError && (
           <p className={styles.footerNote}>
             <CheckCircle2 size={15} />
             {pendingCount === 0 ? '未完了のタスクはありません' : `${pendingCount}件のタスクが残っています`}

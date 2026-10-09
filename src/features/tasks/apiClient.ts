@@ -1,5 +1,8 @@
+import type { RestrictionDurationUnit } from '../../../shared/taskRestrictions';
+
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskRestrictionDurationUnit = RestrictionDurationUnit;
 
 export interface Task {
   id: string;
@@ -21,6 +24,25 @@ export interface TaskInput {
   dueDate?: string | null;
   priority?: TaskPriority;
   status?: TaskStatus;
+}
+
+export interface TaskRestriction {
+  id: string;
+  name: string;
+  eventDate: string;
+  durationValue: number;
+  durationUnit: TaskRestrictionDurationUnit;
+  releaseDate: string;
+  notificationDismissedAt: number | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface TaskRestrictionInput {
+  name: string;
+  eventDate: string;
+  durationValue: number;
+  durationUnit: TaskRestrictionDurationUnit;
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -49,6 +71,18 @@ export const tasksApi = {
     body: JSON.stringify(input),
   }),
   remove: (id: string) => request<{ deleted: true }>(`/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  }),
+  listRestrictions: () => request<{ restrictions: TaskRestriction[] }>('/restrictions'),
+  createRestriction: (input: TaskRestrictionInput) => request<{ restriction: TaskRestriction }>('/restrictions', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  }),
+  updateRestriction: (id: string, input: Partial<TaskRestrictionInput> & { notificationDismissed?: boolean }) => request<{ restriction: TaskRestriction }>(`/restrictions/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  }),
+  removeRestriction: (id: string) => request<{ deleted: true }>(`/restrictions/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   }),
 };

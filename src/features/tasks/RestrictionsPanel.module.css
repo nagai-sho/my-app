@@ -1,0 +1,175 @@
+.panel {
+  overflow: hidden;
+  border: 1px solid #dce2ee;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 14px 36px rgb(47 62 111 / 7%), 0 2px 5px rgb(47 62 111 / 3%);
+}
+
+.panelIntro {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: 1.1rem 1.2rem;
+  border-bottom: 1px solid #e8ebf2;
+  background: #fff;
+}
+
+.panelIcon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 13px;
+  color: #596bd5;
+  background: #edf0ff;
+}
+
+.panelIntro h2,
+.listHeader h2 { margin: 0; color: #303a53; font-size: .95rem; }
+
+.panelIntro p { margin: .25rem 0 0; color: #8991a1; font-size: .75rem; line-height: 1.5; }
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.4fr) minmax(150px, 1fr) minmax(150px, .85fr) auto;
+  align-items: end;
+  gap: .75rem;
+  padding: 1rem 1.2rem 1.1rem;
+  border-bottom: 1px solid #e8ebf2;
+  background: #fafbff;
+}
+
+.field,
+.durationField { min-width: 0; display: grid; gap: .35rem; color: #778198; font-size: .7rem; font-weight: 750; }
+
+.field input,
+.durationField input,
+.durationField select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: .55rem .65rem;
+  border: 1px solid #dfe4ef;
+  border-radius: 9px;
+  outline: 0;
+  color: #414b64;
+  background: #fff;
+  font-size: .8rem;
+}
+
+.field input:focus,
+.durationField input:focus,
+.durationField select:focus { border-color: #aab5ed; box-shadow: 0 0 0 3px rgb(83 103 217 / 10%); }
+
+.durationField { grid-template-columns: minmax(60px, 1fr) minmax(80px, 1fr); margin: 0; padding: 0; border: 0; }
+.durationField legend { grid-column: 1 / -1; padding: 0; }
+
+.addButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  padding: .55rem .75rem;
+  border: 1px solid #d6ddf8;
+  border-radius: 9px;
+  color: #4354bc;
+  background: #eff1ff;
+  font-size: .76rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.addButton:hover:not(:disabled) { background: #e3e8ff; }
+.addButton:disabled { cursor: default; opacity: .55; }
+
+.releasePreview {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin: -.2rem 0 0;
+  color: #8991a1;
+  font-size: .73rem;
+}
+
+.releasePreview svg { color: #7e8bd7; }
+.releasePreview strong { color: #5463b7; }
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: 1rem 1.2rem .7rem;
+}
+
+.listHeader span { color: #9aa2b3; font-size: .7rem; }
+
+.restrictionList { display: grid; gap: .55rem; margin: 0; padding: 0 1.2rem 1.2rem; list-style: none; }
+
+.restrictionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: .85rem .9rem;
+  border: 1px solid #e5e9f2;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.cardMain { min-width: 0; }
+.cardMain h3 { margin: .35rem 0 .3rem; overflow-wrap: anywhere; color: #303a53; font-size: .92rem; }
+.cardMain p { margin: .15rem 0; color: #8b94a7; font-size: .72rem; line-height: 1.45; }
+.cardMain .releaseDate { margin-top: .4rem; color: #687493; }
+.releaseDate strong { color: #4f5fb6; }
+
+.activeBadge,
+.releasedBadge {
+  width: fit-content;
+  padding: .2rem .45rem;
+  border-radius: 99px;
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+.activeBadge { color: #9b6b26; background: #fff4df; }
+.releasedBadge { color: #517c6b; background: #e9f7f0; }
+
+.deleteButton {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #a6adbb;
+  background: transparent;
+  cursor: pointer;
+}
+
+.deleteButton:hover { color: #c4555e; background: #fff0f1; }
+.deleteButton:disabled { cursor: default; opacity: .5; }
+
+.emptyState { margin: 0 1.2rem 1.2rem; padding: 1.5rem .8rem; border: 1px dashed #d9dfed; border-radius: 12px; color: #9aa2b3; font-size: .78rem; text-align: center; }
+
+.errorMessage { margin: .8rem 1.2rem 0; padding: .65rem .75rem; border-radius: 9px; color: #b04d56; background: #fff0f1; font-size: .78rem; line-height: 1.5; }
+
+@media (max-width: 700px) {
+  .form { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: .85rem; }
+  .addButton { align-self: end; }
+  .releasePreview { grid-column: 1 / -1; }
+  .listHeader { padding-inline: .85rem; }
+  .restrictionList { padding: 0 .85rem .85rem; }
+}
+
+@media (max-width: 390px) {
+  .form { grid-template-columns: 1fr; }
+  .addButton { width: 100%; }
+  .releasePreview { grid-column: 1; }
+}

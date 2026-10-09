@@ -121,6 +121,80 @@
   white-space: nowrap;
 }
 
+.notificationStack { display: grid; gap: .55rem; margin-bottom: 1rem; }
+
+.notificationBanner {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem .9rem;
+  border: 1px solid #f0d8a8;
+  border-radius: 12px;
+  background: #fff9ed;
+  box-shadow: 0 4px 12px rgb(113 83 31 / 5%);
+}
+
+.notificationIcon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  color: #a36c1f;
+  background: #ffefcf;
+}
+
+.notificationText { min-width: 0; flex: 1; }
+.notificationText h3 { margin: 0 0 .18rem; color: #6d4b1b; font-size: .78rem; }
+.notificationText p { margin: 0; overflow-wrap: anywhere; color: #705a36; font-size: .76rem; line-height: 1.45; }
+.notificationText span { display: block; margin-top: .16rem; color: #a18a62; font-size: .66rem; }
+
+.dismissNoticeButton {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #967e59;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dismissNoticeButton:hover { color: #6d4b1b; background: #fff0d5; }
+.dismissNoticeButton:disabled { cursor: default; opacity: .5; }
+
+.featureTabs { display: flex; gap: .35rem; margin: 0 0 .85rem; padding: .25rem; border: 1px solid #e1e6f0; border-radius: 12px; background: rgb(255 255 255 / 78%); }
+
+.featureTab,
+.featureTabActive {
+  min-height: 42px;
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .45rem .8rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #838c9e;
+  background: transparent;
+  font-size: .8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.featureTab:hover { color: #56617c; background: #f6f7fb; }
+.featureTab span,
+.featureTabActive span { color: #a2aabc; font-size: .68rem; font-weight: 750; }
+.featureTabActive { border-color: #e1e6fb; color: var(--blue-dark); background: #edf0ff; }
+.featureTabActive span { color: var(--blue); }
+.featureTab:focus-visible,
+.featureTabActive:focus-visible,
+.dismissNoticeButton:focus-visible { outline: 3px solid rgb(83 103 217 / 28%); outline-offset: 2px; }
+
 .notebook {
   overflow: hidden;
   border: 1px solid #dce2ee;
@@ -585,6 +659,9 @@
   .pageIntro { align-items: flex-start; flex-direction: column; gap: .55rem; }
   .pageIntro h2 { font-size: 1.65rem; }
   .today { padding: 0; }
+  .notificationBanner { align-items: flex-start; padding: .7rem; }
+  .notificationIcon { width: 36px; height: 36px; }
+  .dismissNoticeButton { width: 36px; height: 36px; }
   .notebookToolbar { align-items: stretch; flex-direction: column; gap: .5rem; padding: .65rem .7rem; }
   .filterTabs { justify-content: space-between; }
   .filterButton, .filterActive { flex: 1; padding-inline: .4rem; }

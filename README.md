@@ -28,7 +28,7 @@ npm run dev:pages
 - `/collection`: 画像・PDFの書籍整理、アップロード、並び替え、閲覧
 - `/gatherer`: 情報源の登録、記事収集、既読管理、実行履歴
 - `/operations`: アプリの応答状況、Tasksの進捗、Gathererの実行状態をまとめて確認
-- `/tasks`: 期限・優先度・ステータス付きの個人タスク管理
+- `/tasks`: 個人タスク管理と制限解除のお知らせ
 
 cashbook-app、word-app、collection-app、gatherer-appの画面・API・D1データは、my-app内の機能として共通ビルド・Pages Functions・認証を利用します。
 移設内容の詳細は [cashbook-app統合メモ](doc/cashbook-app-integration.md) と [word-app統合メモ](doc/word-app-integration.md) を参照してください。
@@ -88,7 +88,7 @@ npm run d1:migrate:local
 npm run d1:migrate
 ```
 
-`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が旧管理者セッションの履歴、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目、`0014_gatherer_initial.sql` がgathererのテーブル、`0015_app_sessions.sql` が共通セッション、`0016_gatherer_app_entry.sql` がgathererのランチャー項目、`0017_tasks_initial.sql` がTasksのテーブルとランチャー項目、`0018_external_links.sql` がアプリ区分と外部リンク3件、`0019_remove_unused_launcher_apps.sql` が未使用の予定管理・リンク集、`0020_add_ip_expand_link.sql` がIP Expand、`0021_operations_app_entry.sql` がDashboardを運用状況画面へ切り替え、`0022_remove_notes_launcher_app.sql` が未使用のNotesを削除します。
+`migrations/0001_init.sql` がランチャー、`0002_seed.sql` が初期アプリ、`0003_admin_sessions.sql` が旧管理者セッションの履歴、`0004`〜`0008` がword-appのテーブル、`0009_word_app_entry.sql` がword-appのランチャー項目、`0010_cashbook_initial.sql` がcashbookのテーブル・ビュー・初期カテゴリ、`0011_cashbook_app_entry.sql` がcashbookのランチャー項目、`0012_collection_initial.sql` がcollectionのテーブル、`0013_collection_app_entry.sql` がcollectionのランチャー項目、`0014_gatherer_initial.sql` がgathererのテーブル、`0015_app_sessions.sql` が共通セッション、`0016_gatherer_app_entry.sql` がgathererのランチャー項目、`0017_tasks_initial.sql` がTasksのテーブルとランチャー項目、`0018_external_links.sql` がアプリ区分と外部リンク3件、`0019_remove_unused_launcher_apps.sql` が未使用の予定管理・リンク集、`0020_add_ip_expand_link.sql` がIP Expand、`0021_operations_app_entry.sql` がDashboardを運用状況画面へ切り替え、`0022_remove_notes_launcher_app.sql` が未使用のNotesを削除、`0023`・`0024` がTasksの並び順とカテゴリ、`0025_task_restrictions.sql` が制限記録を追加します。
 
 collection-appの画像・PDFは、既存のR2バケット `collection-app-image` を `COLLECTION_R2` bindingとして参照します。既存データのR2キーは移行時に変更せず、APIが旧キーをフォールバック参照します。
 
@@ -107,7 +107,7 @@ collection-appの画像・PDFは、既存のR2バケット `collection-app-image
 - Cashbook: `/api/v1/cashbook/categories`、`/merchants`、`/transactions`、`/summary`、`/settings`、`/gmail/*`
 - CashbookのGmail OAuth: `/api/v1/cashbook/gmail/connect` と `/api/v1/cashbook/gmail/callback`
 - Gatherer: `/api/v1/gatherer/items`、`/sources`、`/rules`、`/tasks`、`/collect`、`/runs`
-- Tasks: `/api/v1/tasks`（一覧、作成、更新、削除）
+- Tasks: `/api/v1/tasks`（一覧、作成、更新、削除）、`/api/v1/tasks/restrictions`（制限記録と解除通知）
 - Operations: `/api/v1/operations`（登録アプリの状態、Tasks・Gathererの運用サマリー）
 
 Pages FunctionsはGoogle credentialの署名、`exp`、`aud`、issuer、メール検証済みフラグ、許可メールアドレスを確認します。共通セッションのトークンはハッシュ化して`app_sessions`へ保存します。
@@ -121,7 +121,7 @@ Pages FunctionsはGoogle credentialの署名、`exp`、`aud`、issuer、メー�
 - `src/features/collection/`: collection-appの書籍、ギャラリー、ファイルビューア、R2/D1連携
 - `src/features/gatherer/`: 情報源、収集結果、タスク、実行履歴
 - `src/features/operations/`: 登録アプリの状態、Tasks・Gathererの運用サマリー
-- `src/features/tasks/`: タスク一覧、検索・フィルター、編集
+- `src/features/tasks/`: タスク一覧、検索・フィルター、編集、制限記録・解除通知
 - `src/features/auth/`: 認証状態の管理
 - `src/lib/auth/`: Google Identity Services連携
 - `functions/api/`: my-appの共通Pages Functions APIハンドラ。`api/v1/cashbook/`、`api/v1/collection/`、`api/v1/gatherer/`、`api/v1/operations/`、`api/v1/tasks/`、`api/v1/word/` に各機能APIを含む
