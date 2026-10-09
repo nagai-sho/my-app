@@ -60,7 +60,11 @@ function toInsert(table, row) {
     return `INSERT INTO gatherer_rules (id, source_id, include_keywords, exclude_keywords, regex, tags, created_at, updated_at) VALUES (${q(row.id)}, ${q(row.source_id)}, ${q(row.include_keywords)}, ${q(row.exclude_keywords)}, ${q(row.regex)}, ${q(row.tags)}, ${number(row.created_at)}, ${number(row.updated_at)}) ON CONFLICT(id) DO UPDATE SET source_id = excluded.source_id, include_keywords = excluded.include_keywords, exclude_keywords = excluded.exclude_keywords, regex = excluded.regex, tags = excluded.tags, updated_at = excluded.updated_at;`;
   }
   if (table === 'items') {
-    return `INSERT INTO gatherer_items (id, owner_id, source_id, rule_id, external_id, title, url, summary, published_at, day_key, score, created_at, updated_at) VALUES (${q(row.id)}, 'owner', ${q(row.source_id)}, ${q(row.rule_id)}, ${q(row.external_id)}, ${q(row.title)}, ${q(row.url)}, ${q(row.summary)}, ${numberOrNull(row.published_at)}, ${q(row.day_key)}, ${number(row.score)}, ${number(row.created_at)}, ${number(row.created_at)}) ON CONFLICT(source_id, external_id) DO UPDATE SET owner_id = 'owner', rule_id = excluded.rule_id, title = excluded.title, url = excluded.url, summary = excluded.summary, published_at = excluded.published_at, day_key = excluded.day_key, score = excluded.score, updated_at = excluded.updated_at;`;
+    // The integrated app may already contain a newer re-fetch of the same
+    // external item. Keep that row and only backfill items that are missing
+    // from my-app; the legacy database has no updated_at column to arbitrate
+    // which representation is newer.
+    return `INSERT INTO gatherer_items (id, owner_id, source_id, rule_id, external_id, title, url, summary, published_at, day_key, score, created_at, updated_at) VALUES (${q(row.id)}, 'owner', ${q(row.source_id)}, ${q(row.rule_id)}, ${q(row.external_id)}, ${q(row.title)}, ${q(row.url)}, ${q(row.summary)}, ${numberOrNull(row.published_at)}, ${q(row.day_key)}, ${number(row.score)}, ${number(row.created_at)}, ${number(row.created_at)}) ON CONFLICT(source_id, external_id) DO NOTHING;`;
   }
   if (table === 'item_states') {
     return `INSERT INTO gatherer_item_states (owner_id, item_id, read, created_at, updated_at) VALUES ('owner', ${q(row.item_id)}, ${number(row.read)}, ${number(row.created_at)}, ${number(row.updated_at)}) ON CONFLICT(owner_id, item_id) DO UPDATE SET read = excluded.read, updated_at = excluded.updated_at;`;
