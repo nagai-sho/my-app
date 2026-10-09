@@ -1,5 +1,5 @@
-import { useMemo, useState, type FormEvent } from 'react';
-import { CalendarDays, Clock3, Plus, Trash2 } from 'lucide-react';
+import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { CalendarDays, Check, Clock3, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { tasksApi, type TaskRestrictionDurationUnit, type TaskRestrictionInput } from './apiClient';
@@ -20,6 +20,8 @@ export function RestrictionsPanel({ today }: { today: string }): JSX.Element {
   const [eventDate, setEventDate] = useState(today);
   const [durationValue, setDurationValue] = useState('1');
   const [durationUnit, setDurationUnit] = useState<TaskRestrictionDurationUnit>('years');
+  const [editingRestrictionId, setEditingRestrictionId] = useState<string | null>(null);
+  const [draftRestrictionName, setDraftRestrictionName] = useState('');
   const [operationError, setOperationError] = useState<string | null>(null);
   const durationNumber = Number(durationValue);
   const releaseDate = useMemo(() => {
@@ -50,6 +52,16 @@ export function RestrictionsPanel({ today }: { today: string }): JSX.Element {
     },
     onError: (error: unknown) => setOperationError(getErrorMessage(error, '制限を削除できませんでした。')),
   });
+  const updateMutation = useMutation({
+    mutationFn: ({ id, name: nextName }: { id: string; name: string }) => tasksApi.updateRestriction(id, { name: nextName }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: RESTRICTIONS_QUERY_KEY });
+      setEditingRestrictionId(null);
+      setDraftRestrictionName('');
+      setOperationError(null);
+    },
+    onError: (error: unknown) => setOperationError(getErrorMessage(error, '制限名を保存できませんでした。')),
+  });
 
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -69,6 +81,36 @@ export function RestrictionsPanel({ today }: { today: string }): JSX.Element {
   function removeRestriction(id: string, restrictionName: string): void {
     if (removeMutation.isPending) return;
     if (window.confirm(`「${restrictionName}」の制限記録を削除しますか？`)) removeMutation.mutate(id);
+  }
+
+  function beginNameEdit(id: string, currentName: string): void {
+    setEditingRestrictionId(id);
+    setDraftRestrictionName(currentName);
+    setOperationError(null);
+  }
+
+  function cancelNameEdit(): void {
+    setEditingRestrictionId(null);
+    setDraftRestrictionName('');
+  }
+
+  function saveName(event: FormEvent<HTMLFormElement>, id: string, currentName: string): void {
+    event.preventDefault();
+    const nextName = draftRestrictionName.trim();
+    if (!nextName) {
+      setOperationError('制限名を入力してください。');
+      return;
+    }
+    if (updateMutation.isPending) return;
+    if (nextName === currentName) {
+      cancelNameEdit();
+      return;
+    }
+    updateMutation.mutate({ id, name: nextName });
+  }
+
+  function handleNameKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+    if (event.key === 'Escape') cancelNameEdit();
   }
 
   const restrictions = restrictionsQuery.data?.restrictions ?? [];
@@ -135,21 +177,55 @@ export function RestrictionsPanel({ today }: { today: string }): JSX.Element {
               <li className={styles.restrictionCard} key={restriction.id}>
                 <div className={styles.cardMain}>
                   <div className={released ? styles.releasedBadge : styles.activeBadge}>{released ? '解除済み' : '制限中'}</div>
-                  <h3>{restriction.name}</h3>
+                  {editingRestrictionId === restriction.id ? (
+                    <form className={styles.nameEditForm} onSubmit={(event) => saveName(event, restriction.id, restriction.name)}>
+                      <label className={styles.srOnly} htmlFor={`restriction-name-${restriction.id}`}>制限名を編集</label>
+                      <input
+                        id={`restriction-name-${restriction.id}`}
+                        className={styles.nameEditInput}
+                        value={draftRestrictionName}
+                        onChange={(event) => setDraftRestrictionName(event.target.value)}
+                        onKeyDown={handleNameKeyDown}
+                        maxLength={200}
+                        autoFocus
+                        disabled={updateMutation.isPending}
+                      />
+                      <button className={styles.saveNameButton} type="submit" aria-label="制限名を保存" title="保存" disabled={updateMutation.isPending || !draftRestrictionName.trim() || draftRestrictionName.trim() === restriction.name}>
+                        <Check size={16} />
+                      </button>
+                      <button className={styles.cancelNameButton} type="button" aria-label="制限名の編集をキャンセル" title="キャンセル" onClick={cancelNameEdit} disabled={updateMutation.isPending}>
+                        <X size={16} />
+                      </button>
+                    </form>
+                  ) : <h3>{restriction.name}</h3>}
                   <p>実施日: {formatRestrictionDate(restriction.eventDate)}</p>
                   <p>期間: {restriction.durationValue}{durationLabels[restriction.durationUnit]}</p>
                   <p className={styles.releaseDate}>解除予定日: <strong>{formatRestrictionDate(restriction.releaseDate)}</strong></p>
                 </div>
-                <button
-                  className={styles.deleteButton}
-                  type="button"
-                  aria-label={`${restriction.name}の制限記録を削除`}
-                  title="削除"
-                  onClick={() => removeRestriction(restriction.id, restriction.name)}
-                  disabled={removeMutation.isPending}
-                >
-                  <Trash2 size={17} />
-                </button>
+                <div className={styles.cardActions}>
+                  {editingRestrictionId !== restriction.id && (
+                    <button
+                      className={styles.editButton}
+                      type="button"
+                      aria-label={`${restriction.name}の名称を変更`}
+                      title="名称を変更"
+                      onClick={() => beginNameEdit(restriction.id, restriction.name)}
+                      disabled={updateMutation.isPending}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  )}
+                  <button
+                    className={styles.deleteButton}
+                    type="button"
+                    aria-label={`${restriction.name}の制限記録を削除`}
+                    title="削除"
+                    onClick={() => removeRestriction(restriction.id, restriction.name)}
+                    disabled={removeMutation.isPending || updateMutation.isPending}
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
               </li>
             );
           })}
